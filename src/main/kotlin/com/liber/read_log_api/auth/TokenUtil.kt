@@ -4,6 +4,8 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
+import com.liber.read_log_api.exception.ApiException
+import com.liber.read_log_api.exception.ExceptionType
 import java.util.*
 
 class TokenUtil {
@@ -47,7 +49,7 @@ class TokenUtil {
         // TODO Exception
         fun matchToken(authorizationToken: String, lastAccessToken: String) {
             val isUnAuthorized = authorizationToken != lastAccessToken
-            if (isUnAuthorized) throw IllegalArgumentException()
+            if (isUnAuthorized) throw ApiException(ExceptionType.INVALID_AUTH)
         }
 
         // TODO
