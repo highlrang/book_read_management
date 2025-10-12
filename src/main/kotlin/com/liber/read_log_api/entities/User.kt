@@ -1,5 +1,6 @@
 package com.liber.read_log_api.entities
 
+import com.liber.read_log_api.annotation.PhoneNumber
 import jakarta.persistence.*
 
 @Entity
@@ -13,6 +14,7 @@ class User (
     var loginId: String = "",
     var password: String = "",
     var name: String = "",
+    var phoneNumber: String = "",
     var address: String? = null,
     var addressDetail: String? = null,
     var addressLatitude: Double? = null,

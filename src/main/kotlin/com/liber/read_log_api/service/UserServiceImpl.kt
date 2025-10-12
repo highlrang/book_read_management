@@ -26,10 +26,11 @@ class UserServiceImpl(
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
         }
 
-        val user = userRepository.save(User(
+        val user = userRepository.save(User( // TODO factory method
             loginId = request.loginId,
             password = encryptPassword(request.password),
             name = request.name,
+            phoneNumber = request.phoneNumber,
             address = request.address,
             addressDetail = request.addressDetail,
             addressLatitude = request.addressLatitude,
