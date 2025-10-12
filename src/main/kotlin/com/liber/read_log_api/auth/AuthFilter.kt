@@ -5,6 +5,7 @@ import com.liber.read_log_api.repository.UserRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.MDC
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.context.request.RequestAttributes
@@ -69,17 +70,9 @@ class AuthFilter(
 
             RequestContextHolder.currentRequestAttributes()
                 .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)
+            MDC.put("userId", userId.toString())
 
             filterChain.doFilter(request, response)
-
-            /*
-            TODO Logging
-            val cachingRequest = ContentCachingRequestWrapper(request)
-            val cachingResponse = ContentCachingResponseWrapper(response)
-
-            filterChain.doFilter(cachingRequest, cachingResponse)
-             */
-
 
         } catch (ex : Exception) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
