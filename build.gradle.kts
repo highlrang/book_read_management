@@ -38,6 +38,7 @@ dependencies {
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("org.springframework.security:spring-security-crypto")
+    implementation("io.github.microutils:kotlin-logging:3.0.5")
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
     annotationProcessor("org.projectlombok:lombok")

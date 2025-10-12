@@ -9,8 +9,17 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 class FilterConfig(
-    private val authFilter: AuthFilter
+    private val authFilter: AuthFilter,
+    private val loggingFilter: LoggingFilter
 ) {
+    @Bean
+    fun loggingFilterRegistration(): FilterRegistrationBean<LoggingFilter> {
+        val registration = FilterRegistrationBean(loggingFilter)
+        registration.addUrlPatterns("/*")
+        registration.order = 0
+        return registration
+    }
+
     @Bean
     fun filterRegistration(): FilterRegistrationBean<AuthFilter> {
         val registration = FilterRegistrationBean(authFilter)
