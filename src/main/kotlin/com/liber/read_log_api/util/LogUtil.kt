@@ -1,5 +1,6 @@
 package com.liber.read_log_api.util
 
+import com.liber.read_log_api.exception.ExceptionType
 import mu.KotlinLogging
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
@@ -56,7 +57,9 @@ class LogUtil {
         }
 
         // ERROR with Custom message
-        fun logError(message: String) {
+        fun logError(exceptionType: ExceptionType, customMessage: String?) {
+            var message = exceptionType.message
+            if (customMessage != null) message += "    $customMessage"
             log.error("[EXCEPTION] $message")
         }
     }

@@ -1,6 +1,8 @@
 package com.liber.read_log_api.auth
 
 import com.liber.read_log_api.entities.User
+import com.liber.read_log_api.exception.ApiException
+import com.liber.read_log_api.exception.ExceptionType
 import com.liber.read_log_api.repository.UserRepository
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
@@ -65,7 +67,7 @@ class AuthFilter(
             val userId: Long = TokenUtil.getUserId(decodedJwt)
 
             val user: User = userRepository.findById(userId)
-                .orElseThrow { throw IllegalArgumentException() }
+                .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
             TokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
 
             RequestContextHolder.currentRequestAttributes()
