@@ -85,6 +85,7 @@ class AuthFilter(
     fun isApiKeyNotRequiredPath(requestUri: String) : Boolean {
         return requestUri.startsWith("/swagger-ui")
             || requestUri.startsWith("/v3/api-docs")
+            || requestUri.equals("/")
     }
 
     fun isTokenNotRequiredPath(requestUri: String) : Boolean {

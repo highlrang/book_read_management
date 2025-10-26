@@ -1,0 +1,49 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches:
+      - develop
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 소스 체크아웃
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      # 2. AWS 자격 증명 설정
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-northeast-2   # 서울 리전
+
+      # 3. ECR 로그인
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # 4. Docker 이미지 빌드 & 태깅
+      - name: Build Docker image
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker build -t book-read-management-api:$IMAGE_TAG .
+          docker tag book-read-management-api:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
+
+      # 5. ECR 푸시
+      - name: Push to ECR
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          docker push ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
+
+#      - name: Deploy to CodeDeploy
+#        run: |
+#          aws deploy create-deployment \
+#            --application-name my-codedeploy-app \
+#            --deployment-group-name my-codedeploy-dg \
+#            --s3-location bucket=my-bucket,key=appspec-bundle.zip,bundleType=zip \
+#            --image-definitions "[{\"name\":\"book-read-management-api\",\"imageUri\":\"642078921209.dkr.ecr.ap-northeast-2.amazonaws.com/book-read-management-api:${GITHUB_SHA}\"}]"

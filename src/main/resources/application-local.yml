@@ -4,8 +4,8 @@ spring:
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/read_log_db
+    url: jdbc:mysql://book-read-management.cja8esuaszdy.ap-northeast-2.rds.amazonaws.com/book_read_management
     username: ${DB_USERNAME}
-    password:
+    password: ${DB_PASSWORD}
 
 apiKey: abcd1234
