@@ -31,7 +31,7 @@ jobs:
       - name: Build Docker image
         run: |
           IMAGE_TAG=${{ github.sha }}
-          docker build -t book-read-management-api:$IMAGE_TAG .
+          docker build -t book-read-management-api:$IMAGE_TAG --platform linux/amd64 .
           docker tag book-read-management-api:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
 
       # 5. ECR 푸시
