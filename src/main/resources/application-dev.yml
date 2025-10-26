@@ -4,10 +4,10 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://ec2-3-37-239-53.ap-northeast-2.compute.amazonaws.com/book_read_management
+    url: jdbc:mysql://book-read-management.cja8esuaszdy.ap-northeast-2.rds.amazonaws.com/book_read_management
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
-MYNAME: ${MYNAME:GUEST}
+NAME: ${MYNAME:GUEST}
 
 apiKey: abcd1234

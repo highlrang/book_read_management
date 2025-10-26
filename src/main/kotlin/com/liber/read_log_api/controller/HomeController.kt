@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class HomeController {
 
-    @Value("\${MYNAME:GUEST}")
+    @Value("\${NAME:GUEST}")
     private lateinit var NAME: String
 
     @GetMapping
