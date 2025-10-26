@@ -39,6 +39,11 @@ dependencies {
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("org.springframework.security:spring-security-crypto")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+
+    implementation(platform("software.amazon.awssdk:bom:2.27.12"))
+    implementation("software.amazon.awssdk:secretsmanager")
+    implementation("software.amazon.awssdk:regions")
+
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
     annotationProcessor("org.projectlombok:lombok")

@@ -24,8 +24,8 @@
         </encoder>
     </appender>
 
-    <!-- For local development -->
-    <springProfile name="local">
+    <!-- For local, dev development -->
+    <springProfile name="local, dev">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
@@ -34,8 +34,8 @@
         </logger>
     </springProfile>
 
-    <!-- For dev, prod environments -->
-    <springProfile name="!local">
+    <!-- For stg, prod environments -->
+    <springProfile name="stg, prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
