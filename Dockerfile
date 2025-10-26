@@ -13,7 +13,8 @@ RUN chmod +x ./gradlew
 RUN ./gradlew --no-daemon dependencies || true
 
 # 이후 전체 복사 → 소스 변경 시 여기서부터만 캐시 무효화
-COPY ../../Downloads .
+#COPY . .
+
 # 테스트는 이미지 빌드 속도를 위해 보통 스킵(필요시 제거)
 RUN ./gradlew clean bootJar -x test --no-daemon
 
