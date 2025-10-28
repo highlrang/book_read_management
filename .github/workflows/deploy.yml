@@ -39,11 +39,37 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           docker push ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
+          
+      - name: Get image digest
+        id: img
+        run: |
+          DIGEST=$(aws ecr describe-images \
+            --repository-name book-read-management-api \
+            --image-ids imageTag=${{ github.sha }} \
+            --query 'imageDetails[0].imageDigest' --output text)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
-#      - name: Deploy to CodeDeploy
-#        run: |
-#          aws deploy create-deployment \
-#            --application-name my-codedeploy-app \
-#            --deployment-group-name my-codedeploy-dg \
-#            --s3-location bucket=my-bucket,key=appspec-bundle.zip,bundleType=zip \
-#            --image-definitions "[{\"name\":\"book-read-management-api\",\"imageUri\":\"642078921209.dkr.ecr.ap-northeast-2.amazonaws.com/book-read-management-api:${GITHUB_SHA}\"}]"
+      - name: Render taskdef
+        run: |
+          sed "s|<ECR_URI>@<DIGEST>|${{ steps.ecr.outputs.registry }}/book-read-management-api@${{ steps.img.outputs.digest }}|g" taskdef.json > taskdef.rendered.json
+
+      - name: Register new task definition
+        id: reg
+        run: |
+          REVISION=$(aws ecs register-task-definition \
+            --cli-input-json file://taskdef.rendered.json \
+            --query 'taskDefinition.taskDefinitionArn' --output text)
+          echo "td_arn=$REVISION" >> $GITHUB_OUTPUT
+
+      - name: Update ECS service
+        run: |
+          aws ecs update-service \
+          --cluster book_read_management \
+          --service book_read_management-service-oruq1qnd \
+          --task-definition ${{ steps.reg.outputs.td_arn }}
+
+      - name: Wait until stable
+        run: |
+          aws ecs wait services-stable \
+            --cluster book_read_management \
+            --services book_read_management-service-oruq1qnd
