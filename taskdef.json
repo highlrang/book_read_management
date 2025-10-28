@@ -1,26 +1,16 @@
 {
-  "family": "my-spring-app-taskdef",
-  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
+  "family": "book_read_management_api",
   "networkMode": "awsvpc",
+  "executionRoleArn": "arn:aws:iam::642078921209:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::642078921209:role/ecsTaskRole",
   "containerDefinitions": [
     {
-      "name": "spring-app",
-      "image": "<IMAGE1_NAME>",
-      "cpu": 256,
-      "memory": 512,
-      "essential": true,
-      "portMappings": [
-        {
-          "containerPort": 8080,
-          "hostPort": 8080,
-          "protocol": "tcp"
-        }
-      ]
+      "name": "app",
+      "image": "<ECR_URI>@<DIGEST>",
+      "portMappings": [{ "containerPort": 8080, "hostPort": 8080 }]
     }
   ],
-  "requiresCompatibilities": [
-    "EC2"
-  ],
-  "cpu": "256",
-  "memory": "512"
+  "requiresCompatibilities": ["EC2"],
+  "cpu": "512",
+  "memory": "1024"
 }
