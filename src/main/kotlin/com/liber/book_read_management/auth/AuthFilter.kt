@@ -1,0 +1,95 @@
+package com.liber.book_read_management.auth
+
+import com.liber.book_read_management.entities.User
+import com.liber.book_read_management.exception.ApiException
+import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.repository.UserRepository
+import jakarta.servlet.FilterChain
+import jakarta.servlet.http.HttpServletRequest
+import jakarta.servlet.http.HttpServletResponse
+import org.slf4j.MDC
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
+import org.springframework.web.context.request.RequestAttributes
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.filter.OncePerRequestFilter
+
+// TODO API Key
+@Component
+class AuthFilter(
+    private var userRepository: UserRepository
+) : OncePerRequestFilter() {
+
+    @Value("\${apiKey}")
+    private lateinit var API_KEY: String
+
+    override fun doFilterInternal(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        filterChain: FilterChain
+    ) {
+        // API Key 인증 패스
+        if (isApiKeyNotRequiredPath(request.requestURI)) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
+        // API Key 인증
+        // TODO 상수화
+        val apiKey = request.getHeader("API_Key")
+        if (apiKey == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid api key")
+            return
+        }
+
+        if (API_KEY != apiKey) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid api key")
+            return
+        }
+
+        // 토큰 인증 패스
+        if (isTokenNotRequiredPath(request.requestURI)) {
+            filterChain.doFilter(request, response)
+            return
+        }
+
+        // 토큰 인증
+        var token = request.getHeader("Authorization")
+        if (token == null) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
+            return
+        }
+
+        try {
+            token = token.substring("Bearer ".length)
+            val decodedJwt = TokenUtil.verifyToken(token)
+
+            val userId: Long = TokenUtil.getUserId(decodedJwt)
+
+            val user: User = userRepository.findById(userId)
+                .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
+            TokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
+
+            RequestContextHolder.currentRequestAttributes()
+                .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)
+            MDC.put("userId", userId.toString())
+
+            filterChain.doFilter(request, response)
+
+        } catch (ex : Exception) {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
+
+        }
+    }
+
+    fun isApiKeyNotRequiredPath(requestUri: String) : Boolean {
+        return requestUri.startsWith("/swagger-ui")
+            || requestUri.startsWith("/v3/api-docs")
+            || requestUri.equals("/")
+    }
+
+    fun isTokenNotRequiredPath(requestUri: String) : Boolean {
+        return requestUri.startsWith("/api/v1/auth/sign-up")
+                || requestUri.startsWith("/api/v1/auth/login")
+    }
+}
