@@ -29,7 +29,7 @@
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
-        <logger name="com.liber.read_log_api" level="DEBUG" additivity="false">
+        <logger name="com.liber.book_read_management" level="DEBUG" additivity="false">
             <appender-ref ref="CONSOLE"/>
         </logger>
     </springProfile>
@@ -40,7 +40,7 @@
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </root>
-        <logger name="com.liber.read_log_api" level="INFO" additivity="false">
+        <logger name="com.liber.book_read_management" level="INFO" additivity="false">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
         </logger>
