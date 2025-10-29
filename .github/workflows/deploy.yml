@@ -61,15 +61,24 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' --output text)
           echo "td_arn=$REVISION" >> $GITHUB_OUTPUT
 
-      - name: Update ECS service
+      - name: Scale down to 0
         run: |
           aws ecs update-service \
-          --cluster book_read_management \
-          --service book_read_management-service-oruq1qnd \
-          --task-definition ${{ steps.reg.outputs.td_arn }}
+            --cluster book_read_management \
+            --service book_read_management-service-oruq1qnd \
+            --desired-count 0
 
-      - name: Wait until stable
+      - name: Scale up to 1
+        run: |
+          aws ecs update-service \
+            --cluster book_read_management \
+            --service book_read_management-service-oruq1qnd \
+            --desired-count 1 \
+            --task-definition ${{ steps.reg.outputs.td_arn }}
+
+      - name: Wait until service stable
         run: |
           aws ecs wait services-stable \
             --cluster book_read_management \
             --services book_read_management-service-oruq1qnd
+            --cli-read-timeout 300
