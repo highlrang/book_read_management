@@ -1,21 +1,29 @@
 package com.liber.book_read_management.service
 
+import com.liber.book_read_management.dto.BookRatingSaveRequest
+import com.liber.book_read_management.dto.BookRatingUpdateRequest
 import com.liber.book_read_management.dto.BookReadLogSaveRequest
 import com.liber.book_read_management.dto.BookReadPageUpdateRequest
+import com.liber.book_read_management.dto.BookReviewSaveRequest
 import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.BookReadProgress
+import com.liber.book_read_management.entities.BookReviewLog
 import com.liber.book_read_management.enums.PageType
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.repository.BookRatingLogRepository
 import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReadProgressRepository
+import com.liber.book_read_management.repository.BookReviewLogRepository
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class BookReadLogServiceImpl(
-    var bookReadLogRepository: BookReadLogRepository,
-    var bookReadProgressRepository: BookReadProgressRepository
+    private var bookReadLogRepository: BookReadLogRepository,
+    private var bookReadProgressRepository: BookReadProgressRepository,
+    private val bookReviewLogRepository: BookReviewLogRepository,
+    private val bookRatingLogRepository: BookRatingLogRepository
 ) : BookReadLogService {
 
     /**
@@ -54,6 +62,47 @@ class BookReadLogServiceImpl(
             bookReadProgress.updateReadPage(bookReadPageUpdateRequest.page, bookReadLog.totalPage)
         }
 
+    }
+
+    @Transactional
+    override fun saveBookReview(
+        userId: Long,
+        reviewSaveRequest: BookReviewSaveRequest
+    ) {
+        bookReadLogRepository.findByUserIdAndId(userId, reviewSaveRequest.bookReadLogId) ?:
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        bookReviewLogRepository.save(reviewSaveRequest.toEntity())
+    }
+
+    @Transactional
+    override fun saveBookRating(
+        userId: Long,
+        ratingSaveRequest: BookRatingSaveRequest
+    ) {
+        bookReadLogRepository.findByUserIdAndId(userId, ratingSaveRequest.bookReadLogId) ?:
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId( ratingSaveRequest.bookReadLogId)
+        if (bookRatingLog != null)
+            throw ApiException(ExceptionType.ALREADY_EXIST)
+
+        bookRatingLogRepository.save(ratingSaveRequest.toEntity())
+
+    }
+
+    @Transactional
+    override fun updateBookRating(
+        userId: Long,
+        ratingUpdateRequest: BookRatingUpdateRequest
+    ) {
+        bookReadLogRepository.findByUserIdAndId(userId, ratingUpdateRequest.bookReadLogId) ?:
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId( ratingUpdateRequest.bookReadLogId) ?:
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        bookRatingLog.update(ratingUpdateRequest.rating, ratingUpdateRequest.content)
     }
 
 }
