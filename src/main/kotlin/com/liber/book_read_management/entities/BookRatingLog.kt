@@ -21,4 +21,10 @@ class BookRatingLog(
 
     var content: String,
 
-) : BaseTimeEntity()
+) : BaseTimeEntity() {
+
+    fun update(rating: Int?, content: String?) {
+        if (rating != null) this.rating = rating
+        if (content != null) this.content = content
+    }
+}
