@@ -66,6 +66,13 @@ jobs:
           aws ecs update-service \
             --cluster book_read_management \
             --service book_read_management-service-oruq1qnd \
+            --deployment-configuration "maximumPercent=100,minimumHealthyPercent=0"
+
+      - name: Scale down to 0
+        run: |
+          aws ecs update-service \
+            --cluster book_read_management \
+            --service book_read_management-service-oruq1qnd \
             --desired-count 0
 
       - name: Wait until service stable
