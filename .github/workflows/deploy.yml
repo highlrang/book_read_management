@@ -70,6 +70,18 @@ jobs:
             aws ecs stop-task --cluster book_read_management --task $task
           done
 
+      - name: Wait until tasks stopped
+        run: |
+          TASKS=$(aws ecs list-tasks --cluster book_read_management \
+            --service-name book_read_management-service-oruq1qnd \
+            --query "taskArns[]" --output text)
+          if [ ! -z "$TASKS" ]; then
+            aws ecs wait tasks-stopped --cluster book_read_management --tasks $TASKS
+          fi
+
+      - name: Wait a few seconds for resource release
+        run: sleep 20
+
       - name: Scale up to 1
         run: |
           aws ecs update-service \
