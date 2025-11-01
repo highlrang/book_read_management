@@ -1,6 +1,6 @@
 {
   "family": "book_read_management_api",
-  "networkMode": "awsvpc",
+  "networkMode": "bridge",
   "executionRoleArn": "arn:aws:iam::642078921209:role/ecsTaskExecutionRole",
   "taskRoleArn": "arn:aws:iam::642078921209:role/ecsTaskRole",
   "containerDefinitions": [
@@ -11,6 +11,6 @@
     }
   ],
   "requiresCompatibilities": ["EC2"],
-  "cpu": "512",
-  "memory": "1024"
+  "cpu": "1024",
+  "memory": "3072"
 }
