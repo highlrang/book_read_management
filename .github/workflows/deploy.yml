@@ -68,6 +68,11 @@ jobs:
             --service book_read_management-service-oruq1qnd \
             --desired-count 0
 
+      - name: ECS Stable
+        run: aws ecs wait services-stable \
+          --cluster book_read_management \
+          --services book_read_management-service-oruq1qnd
+
       - name: Scale up to 1
         run: |
           aws ecs update-service \
