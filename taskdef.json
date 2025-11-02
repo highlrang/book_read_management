@@ -19,7 +19,10 @@
           "containerPath": "/data/logs",
           "readOnly": false
         }
-      ]
+      ],
+      "cpu": 0,
+      "memoryReservation": 512,
+      "memory": 1024
     }
   ],
   "requiresCompatibilities": ["EC2"],
@@ -30,7 +33,5 @@
         "sourcePath": "/"
       }
     }
-  ],
-  "cpu": "1024",
-  "memory": "3072"
+  ]
 }
