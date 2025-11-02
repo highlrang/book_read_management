@@ -20,9 +20,8 @@
           "readOnly": false
         }
       ],
-      "cpu": 0,
-      "memoryReservation": 512,
-      "memory": 1024
+      "cpu": 2048,
+      "memory": 2048
     }
   ],
   "requiresCompatibilities": ["EC2"],
