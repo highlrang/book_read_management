@@ -7,7 +7,7 @@
     {
       "name": "app",
       "image": "<ECR_URI>@<DIGEST>",
-      "portMappings": [{ "containerPort": 8080, "hostPort": 8080 }],
+      "portMappings": [{ "containerPort": 8080, "hostPort": 0 }],
       "environment": [
         { "name": "DB_USER", "value": "admin" },
         { "name": "DB_PASSWORD", "value": "admin1234" },
