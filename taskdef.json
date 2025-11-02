@@ -5,7 +5,7 @@
   "taskRoleArn": "arn:aws:iam::642078921209:role/ecsTaskRole",
   "containerDefinitions": [
     {
-      "name": "app",
+      "name": "book_read_management_api",
       "image": "<ECR_URI>@<DIGEST>",
       "portMappings": [{ "containerPort": 8080, "hostPort": 0 }],
       "environment": [
@@ -17,5 +17,15 @@
       "memory": 3072
     }
   ],
+  "logConfiguration": {
+    "logDriver": "awslogs",
+    "options": {
+      "awslogs-group": "/ecs/book_read_management_api",
+      "awslogs-create-group": "true",
+      "awslogs-region": "ap-northeast-2",
+      "awslogs-stream-prefix": "ecs"
+    },
+    "secretOptions": []
+  },
   "requiresCompatibilities": ["EC2"]
 }
