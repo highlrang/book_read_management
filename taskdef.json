@@ -13,24 +13,9 @@
         { "name": "DB_PASSWORD", "value": "admin1234" },
         { "name": "MYNAME", "value": "정혜우(자동배포)" }
       ],
-      "mountPoints": [
-        {
-          "sourceVolume": "app-logs",
-          "containerPath": "/data/logs",
-          "readOnly": false
-        }
-      ],
       "cpu": 1024,
       "memory": 3072
     }
   ],
-  "requiresCompatibilities": ["EC2"],
-  "volumes": [
-    {
-      "name": "app-logs",
-      "host": {
-        "sourcePath": "/"
-      }
-    }
-  ]
+  "requiresCompatibilities": ["EC2"]
 }
