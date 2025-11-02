@@ -7,10 +7,30 @@
     {
       "name": "app",
       "image": "<ECR_URI>@<DIGEST>",
-      "portMappings": [{ "containerPort": 8080, "hostPort": 8080 }]
+      "portMappings": [{ "containerPort": 8080, "hostPort": 8080 }],
+      "environment": [
+        { "name": "DB_USER", "value": "admin" },
+        { "name": "DB_PASSWORD", "value": "admin1234" },
+        { "name": "MYNAME", "value": "정혜우(자동배포)" }
+      ],
+      "mountPoints": [
+        {
+          "sourceVolume": "app-logs",
+          "containerPath": "/data/logs",
+          "readOnly": false
+        }
+      ]
     }
   ],
   "requiresCompatibilities": ["EC2"],
+  "volumes": [
+    {
+      "name": "app-logs",
+      "host": {
+        "sourcePath": "/"
+      }
+    }
+  ],
   "cpu": "1024",
   "memory": "3072"
 }
