@@ -3,7 +3,7 @@ name: Build and Push to ECR
 on:
   push:
     branches:
-      - develop
+      - develop-aws
 
 jobs:
   build-and-push:
@@ -39,7 +39,7 @@ jobs:
         run: |
           IMAGE_TAG=${{ github.sha }}
           docker push ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
-          
+
       - name: Get image digest
         id: img
         run: |
