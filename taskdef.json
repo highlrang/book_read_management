@@ -1,26 +1,29 @@
 {
-  "family": "my-spring-app-taskdef",
-  "executionRoleArn": "arn:aws:iam::123456789012:role/ecsTaskExecutionRole",
-  "networkMode": "awsvpc",
+  "family": "book_read_management_api",
+  "networkMode": "bridge",
+  "executionRoleArn": "arn:aws:iam::642078921209:role/ecsTaskExecutionRole",
+  "taskRoleArn": "arn:aws:iam::642078921209:role/ecsTaskRole",
   "containerDefinitions": [
     {
-      "name": "spring-app",
-      "image": "<IMAGE1_NAME>",
-      "cpu": 256,
-      "memory": 512,
-      "essential": true,
-      "portMappings": [
-        {
-          "containerPort": 8080,
-          "hostPort": 8080,
-          "protocol": "tcp"
+      "name": "book_read_management_api",
+      "image": "<ECR_URI>@<DIGEST>",
+      "portMappings": [{ "containerPort": 8080, "hostPort": 0 }],
+      "environment": [
+        { "name": "DB_USERNAME", "value": "admin" },
+        { "name": "DB_PASSWORD", "value": "admin1234" },
+        { "name": "MYNAME", "value": "정혜우(자동배포)" }
+      ],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-group": "/ecs/book_read_management_api",
+          "awslogs-region": "ap-northeast-2",
+          "awslogs-stream-prefix": "ecs"
         }
-      ]
+      },
+      "cpu": 1024,
+      "memory": 3072
     }
   ],
-  "requiresCompatibilities": [
-    "EC2"
-  ],
-  "cpu": "256",
-  "memory": "512"
+  "requiresCompatibilities": ["EC2"]
 }
