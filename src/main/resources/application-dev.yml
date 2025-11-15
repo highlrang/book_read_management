@@ -4,7 +4,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://book-read-management.cja8esuaszdy.ap-northeast-2.rds.amazonaws.com/book_read_management
+    url: jdbc:mysql://book_read_management_db:3306/book_read_management
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 

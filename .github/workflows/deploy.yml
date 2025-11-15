@@ -3,7 +3,7 @@ name: Build and Push to ECR
 on:
   push:
     branches:
-      - develop
+      - develop-aws
 
 jobs:
   build-and-push:
@@ -40,13 +40,18 @@ jobs:
           IMAGE_TAG=${{ github.sha }}
           docker push ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
 
-#      - name: Deploy to CodeDeploy
-#        run: |
-#          aws deploy create-deployment \
-#            --application-name my-codedeploy-app \
-#            --deployment-group-name my-codedeploy-dg \
-#            --s3-location bucket=my-bucket,key=appspec-bundle.zip,bundleType=zip \
-#            --image-definitions "[{\"name\":\"book-read-management-api\",\"imageUri\":\"642078921209.dkr.ecr.ap-northeast-2.amazonaws.com/book-read-management-api:${GITHUB_SHA}\"}]"
+      - name: Get image digest
+        id: img
+        run: |
+          DIGEST=$(aws ecr describe-images \
+            --repository-name book-read-management-api \
+            --image-ids imageTag=${{ github.sha }} \
+            --query 'imageDetails[0].imageDigest' --output text)
+          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
+
+      - name: Render taskdef
+        run: |
+          sed "s|<ECR_URI>@<DIGEST>|${{ steps.ecr.outputs.registry }}/book-read-management-api@${{ steps.img.outputs.digest }}|g" taskdef.json > taskdef.rendered.json
 
       - name: Register new task definition
         id: reg
@@ -56,13 +61,29 @@ jobs:
             --query 'taskDefinition.taskDefinitionArn' --output text)
           echo "td_arn=$REVISION" >> $GITHUB_OUTPUT
 
-      # 👉 강제 교체를 위해 DesiredCount 0 → 1
-      - name: Scale down to 0
+      - name: Stop running tasks manually
         run: |
-          aws ecs update-service \
-            --cluster book_read_management \
-            --service book_read_management-service-oruq1qnd \
-            --desired-count 0
+          TASKS=$(aws ecs list-tasks --cluster book_read_management \
+            --service-name book_read_management-service-oruq1qnd \
+            --region ap-northeast-2 \
+            --query 'taskArns' \
+            --output json | jq -r '.[]')
+          for task in $TASKS; do
+            echo "Stopping task: $task"
+            aws ecs stop-task --cluster book_read_management --task $task --region ap-northeast-2
+          done
+
+#      - name: Wait until tasks stopped
+#        run: |
+#          TASKS=$(aws ecs list-tasks --cluster book_read_management \
+#            --service-name book_read_management-service-oruq1qnd \
+#            --query "taskArns[]" --output text)
+#          if [ ! -z "$TASKS" ]; then
+#            aws ecs wait tasks-stopped --cluster book_read_management --tasks $TASKS
+#          fi
+
+      - name: Wait a few seconds for resource release
+        run: sleep 20
 
       - name: Scale up to 1
         run: |
