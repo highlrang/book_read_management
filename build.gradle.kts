@@ -44,6 +44,8 @@ dependencies {
     implementation("software.amazon.awssdk:secretsmanager")
     implementation("software.amazon.awssdk:regions")
 
+    implementation("com.google.genai:google-genai:1.0.0")
+
     compileOnly("org.projectlombok:lombok")
     runtimeOnly("com.mysql:mysql-connector-j")
     annotationProcessor("org.projectlombok:lombok")
