@@ -20,4 +20,8 @@ google:
   ai:
     api-key: ${GEMINI_API_KEY}
 
+client:
+  aladin:
+    ttbKey: ttbdevelopoffi2155001
+
 apiKey: abcd1234
