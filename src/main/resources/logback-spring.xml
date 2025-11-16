@@ -25,7 +25,7 @@
     </appender>
 
     <!-- For local, dev development -->
-    <springProfile name="local, dev">
+    <springProfile name="local">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
         </root>
@@ -35,7 +35,7 @@
     </springProfile>
 
     <!-- For stg, prod environments -->
-    <springProfile name="stg, prod">
+    <springProfile name="dev, stg, prod">
         <root level="INFO">
             <appender-ref ref="CONSOLE"/>
             <appender-ref ref="FILE"/>
