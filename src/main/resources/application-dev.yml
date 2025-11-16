@@ -10,4 +10,8 @@ spring:
 
 NAME: ${MYNAME:GUEST}
 
+google:
+  ai:
+    api-key: ${GEMINI_API_KEY}
+
 apiKey: abcd1234
