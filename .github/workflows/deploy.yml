@@ -3,99 +3,37 @@ name: Build and Push to ECR
 on:
   push:
     branches:
-      - develop-aws
+      - develop
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 소스 체크아웃
       - name: Checkout source
         uses: actions/checkout@v4
 
-      # 2. AWS 자격 증명 설정
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
+      - name: Docker Hub Login
+        uses: docker/login-action@v3
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ap-northeast-2   # 서울 리전
+          registry: docker.io
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 3. ECR 로그인
-      - name: Login to Amazon ECR
-        id: ecr
-        uses: aws-actions/amazon-ecr-login@v2
-
-      # 4. Docker 이미지 빌드 & 태깅
       - name: Build Docker image
         run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker build -t book-read-management-api:$IMAGE_TAG --platform linux/amd64 .
-          docker tag book-read-management-api:$IMAGE_TAG ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
+          IMAGE_TAG=${GITHUB_SHA}
+          echo "Building local image: book-read-management-api:${IMAGE_TAG}"
+          docker build -t book-read-management-api:${IMAGE_TAG} .
+          
+          echo "Tagging for Docker Hub..."
+          docker tag book-read-management-api:${IMAGE_TAG} \
+            docker.io/${{ secrets.DOCKER_USERNAME }}/book-read-management-api:${IMAGE_TAG}
+          docker tag book-read-management-api:${GITHUB_SHA} \
+            docker.io/${{ secrets.DOCKER_USERNAME }}/book-read-management-api:latest
 
-      # 5. ECR 푸시
-      - name: Push to ECR
+      - name: Push Docker image
         run: |
-          IMAGE_TAG=${{ github.sha }}
-          docker push ${{ steps.ecr.outputs.registry }}/book-read-management-api:$IMAGE_TAG
-
-      - name: Get image digest
-        id: img
-        run: |
-          DIGEST=$(aws ecr describe-images \
-            --repository-name book-read-management-api \
-            --image-ids imageTag=${{ github.sha }} \
-            --query 'imageDetails[0].imageDigest' --output text)
-          echo "digest=$DIGEST" >> $GITHUB_OUTPUT
-
-      - name: Render taskdef
-        run: |
-          sed "s|<ECR_URI>@<DIGEST>|${{ steps.ecr.outputs.registry }}/book-read-management-api@${{ steps.img.outputs.digest }}|g" taskdef.json > taskdef.rendered.json
-
-      - name: Register new task definition
-        id: reg
-        run: |
-          REVISION=$(aws ecs register-task-definition \
-            --cli-input-json file://taskdef.rendered.json \
-            --query 'taskDefinition.taskDefinitionArn' --output text)
-          echo "td_arn=$REVISION" >> $GITHUB_OUTPUT
-
-      - name: Stop running tasks manually
-        run: |
-          TASKS=$(aws ecs list-tasks --cluster book_read_management \
-            --service-name book_read_management-service-oruq1qnd \
-            --region ap-northeast-2 \
-            --query 'taskArns' \
-            --output json | jq -r '.[]')
-          for task in $TASKS; do
-            echo "Stopping task: $task"
-            aws ecs stop-task --cluster book_read_management --task $task --region ap-northeast-2
-          done
-
-#      - name: Wait until tasks stopped
-#        run: |
-#          TASKS=$(aws ecs list-tasks --cluster book_read_management \
-#            --service-name book_read_management-service-oruq1qnd \
-#            --query "taskArns[]" --output text)
-#          if [ ! -z "$TASKS" ]; then
-#            aws ecs wait tasks-stopped --cluster book_read_management --tasks $TASKS
-#          fi
-
-      - name: Wait a few seconds for resource release
-        run: sleep 20
-
-      - name: Scale up to 1
-        run: |
-          aws ecs update-service \
-            --cluster book_read_management \
-            --service book_read_management-service-oruq1qnd \
-            --desired-count 1 \
-            --task-definition ${{ steps.reg.outputs.td_arn }}
-
-      - name: Wait until service stable
-        run: |
-          aws ecs wait services-stable \
-            --cluster book_read_management \
-            --services book_read_management-service-oruq1qnd
-            --cli-read-timeout 300
+          IMAGE_TAG=${GITHUB_SHA}
+          docker push docker.io/${{ secrets.DOCKER_USERNAME }}/book-read-management-api:${IMAGE_TAG}
+          docker push docker.io/${{ secrets.DOCKER_USERNAME }}/book-read-management-api:latest

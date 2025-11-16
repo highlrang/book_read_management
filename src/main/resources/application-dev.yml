@@ -8,6 +8,16 @@ spring:
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
+  jpa:
+    hibernate:
+      naming:
+        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+
 NAME: ${MYNAME:GUEST}
+
+google:
+  ai:
+    api-key: ${GEMINI_API_KEY}
 
 apiKey: abcd1234
