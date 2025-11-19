@@ -11,7 +11,7 @@ interface AladinClient {
 
     @GetMapping("/ttb/api/ItemSearch.aspx")
     fun searchItem(
-        @RequestParam("Query") query: String,
+        @RequestParam("Query") query: String?,
         @RequestParam("QueryType") queryType: String = "Title",
         @RequestParam("MaxResults") maxResult: Int,
         @RequestParam("start") start: Int,
