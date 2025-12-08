@@ -13,4 +13,6 @@ interface BookReadLogService {
     fun saveBookReview(userId: Long, reviewSaveRequest: BookReviewSaveRequest)
     fun saveBookRating(userId: Long, ratingSaveRequest: BookRatingSaveRequest)
     fun updateBookRating(userId: Long, ratingUpdateRequest: BookRatingUpdateRequest)
+
+// TODO    fun getReadBooks(userId: Long) : List<BookInfo>
 }
