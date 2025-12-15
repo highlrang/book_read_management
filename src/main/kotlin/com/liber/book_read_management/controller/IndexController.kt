@@ -7,13 +7,14 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/v1/user")
-class HomeController (val userService: UserService) {
+class IndexController (val genAIService: GenAIService) {
+
+    @Value("\${NAME:GUEST}")
+    private lateinit var NAME: String
+
     @GetMapping
-    fun home() : ResponseEntity<Any> {
-
-        // TODO
-
-        return ResponseEntity.ok()
+    fun home() : ResponseEntity<String> {
+        genAIService.recommendBook(genAIService.makeBookRecommendSchema(), genAIService.makeBookRecommendContent())
+        return ResponseEntity.ok("Hello, $NAME!")
     }
 }
