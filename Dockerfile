@@ -3,6 +3,7 @@ FROM gradle:8.7-jdk21-alpine AS builder
 WORKDIR /workspace
 
 # Gradle 캐시 최적화: 설정/의존 스텝 먼저 복사
+COPY env.properties .
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradlew .
 COPY gradlew.bat .
@@ -41,7 +42,6 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -XX:InitialRAMPe
 ENV SPRING_PROFILES_ACTIVE=dev
 
 # JAR 복사
-COPY --from=builder /workspace/env.properties /app/env.properties
 COPY --from=builder /workspace/app.jar /app/app.jar
 
 # 헬스체크(애플리케이션에 /actuator/health 가 있을 때 권장)
