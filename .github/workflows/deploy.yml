@@ -13,6 +13,15 @@ jobs:
       - name: Checkout source
         uses: actions/checkout@v4
 
+      - name: Create .env file
+        run: |
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> .env
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}" >> .env
+          echo "MYNAME=${{ secrets.MYNAME }}" >> .env
+          echo "ALADIN_KEY=${{ secrets.ALADIN_KEY }}" >> .env
+          echo "API_KEY=${{ secrets.API_KEY }}" >> .env
+
       - name: Docker Hub Login
         uses: docker/login-action@v3
         with:
