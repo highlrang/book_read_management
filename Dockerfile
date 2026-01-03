@@ -41,6 +41,7 @@ ENV JAVA_OPTS="-XX:+UseContainerSupport -XX:MaxRAMPercentage=75 -XX:InitialRAMPe
 ENV SPRING_PROFILES_ACTIVE=dev
 
 # JAR 복사
+COPY --from=builder /workspace/env.properties /app/env.properties
 COPY --from=builder /workspace/app.jar /app/app.jar
 
 # 헬스체크(애플리케이션에 /actuator/health 가 있을 때 권장)
