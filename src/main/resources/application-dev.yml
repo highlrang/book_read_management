@@ -2,6 +2,9 @@ server:
   port: 7070
 
 spring:
+  config:
+    import: env.properties
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql:3306/book_read_management
