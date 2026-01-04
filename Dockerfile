@@ -3,7 +3,6 @@ FROM gradle:8.7-jdk21-alpine AS builder
 WORKDIR /workspace
 
 # Gradle 캐시 최적화: 설정/의존 스텝 먼저 복사
-COPY env.properties .
 COPY build.gradle.kts settings.gradle.kts ./
 COPY gradlew .
 COPY gradlew.bat .
