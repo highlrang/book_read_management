@@ -19,7 +19,7 @@ class BookReadLog (
     @Column(name = "book_isbn")
     var bookIsbn: String,
     @Column(name = "total_page")
-    var totalPage: Int,
+    var totalPage: Int? = null,
 
 ) : BaseTimeEntity() {
 
@@ -27,8 +27,7 @@ class BookReadLog (
         fun of(userId: Long, bookReadLogSaveRequest: BookReadLogSaveRequest) : BookReadLog {
             return BookReadLog(
                 userId = userId,
-                bookIsbn = bookReadLogSaveRequest.bookSbn,
-                totalPage = bookReadLogSaveRequest.totalPage,
+                bookIsbn = bookReadLogSaveRequest.bookSbn
             )
         }
     }

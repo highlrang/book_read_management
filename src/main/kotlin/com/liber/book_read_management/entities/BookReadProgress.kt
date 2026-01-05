@@ -29,9 +29,11 @@ class BookReadProgress (
 
 ) : BaseTimeEntity() {
 
-    fun updateReadPage(readPage: Int, totalPage: Int) {
+    fun updateReadPage(readPage: Int, totalPage: Int?) {
         this.readPage = readPage
-        this.progress = (readPage.toDouble() / totalPage * 100).toInt()
+        totalPage?.let {
+            this.progress = (readPage.toDouble() / it * 100).toInt()
+        }
     }
 
     companion object {

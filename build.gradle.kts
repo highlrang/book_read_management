@@ -4,6 +4,7 @@ plugins {
     id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.7"
     kotlin("plugin.jpa") version "1.9.25"
+    kotlin("kapt") version "1.9.25"
 }
 
 group = "com.liber"
@@ -12,7 +13,7 @@ description = "read_log_api"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(21)
+        languageVersion = JavaLanguageVersion.of(17)
     }
 }
 
@@ -28,6 +29,14 @@ repositories {
 
 extra["springCloudVersion"] = "2025.0.0"
 
+sourceSets {
+    main {
+        java {
+            srcDir("build/generated/source/kapt/main")
+        }
+    }
+}
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
@@ -35,6 +44,15 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+    // QueryDSL
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    // QueryDSL APT (Q 클래스 생성)
+    kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
+
+    // Jakarta (APT용)
+    kapt("jakarta.annotation:jakarta.annotation-api")
+    kapt("jakarta.persistence:jakarta.persistence-api")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.7.0")
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
@@ -77,10 +95,3 @@ allOpen {
 tasks.withType<Test> {
     useJUnitPlatform()
 }
-
-
-/*
-plugins {
-    kotlin("plugin.jpa") version "1.9.22"
-}
- */

@@ -1,5 +1,6 @@
 package com.liber.book_read_management.auth
 
+import com.liber.book_read_management.config.API_KEY_HEADER
 import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
@@ -14,7 +15,6 @@ import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 
-// TODO API Key
 @Component
 class AuthFilter(
     private var userRepository: UserRepository
@@ -35,8 +35,7 @@ class AuthFilter(
         }
 
         // API Key 인증
-        // TODO 상수화
-        val apiKey = request.getHeader("API_Key")
+        val apiKey = request.getHeader(API_KEY_HEADER)
         if (apiKey == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid api key")
             return

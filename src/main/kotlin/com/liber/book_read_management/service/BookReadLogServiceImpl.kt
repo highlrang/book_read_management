@@ -1,25 +1,17 @@
 package com.liber.book_read_management.service
 
-import com.liber.book_read_management.dto.BookRatingSaveRequest
-import com.liber.book_read_management.dto.BookRatingUpdateRequest
-import com.liber.book_read_management.dto.BookReadLogSaveRequest
-import com.liber.book_read_management.dto.BookReadPageUpdateRequest
-import com.liber.book_read_management.dto.BookReviewSaveRequest
+import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.BookReadProgress
-import com.liber.book_read_management.enums.PageType
+import com.liber.book_read_management.enums.BookPageType
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import com.liber.book_read_management.repository.BookRatingLogRepository
 import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReadProgressRepository
 import com.liber.book_read_management.repository.BookReviewLogRepository
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.LocalDateTime
-//import kotlin.coroutines.coroutineScope
 
 @Service
 class BookReadLogServiceImpl(
@@ -38,7 +30,7 @@ class BookReadLogServiceImpl(
         userId: Long,
         readLogSaveRequest: BookReadLogSaveRequest
     ) : Long {
-        val existBookReadLog : BookReadLog? = bookReadLogRepository.findByUserIdAndBookIsbn(
+        val existBookReadLog: BookReadLog? = bookReadLogRepository.findByUserIdAndBookIsbn(
             userId,
             readLogSaveRequest.bookSbn
         )
@@ -52,29 +44,26 @@ class BookReadLogServiceImpl(
         return savedBookReadLog.id!!
     }
 
+    override fun searchBookReadLogs(
+        userId: Long,
+        readLogSearchRequest: BookReadLogSearchRequest
+    ): List<BookReadLogResponse> {
+        return bookReadLogRepository.findByUserIdAndSearchParam(userId, readLogSearchRequest)
+    }
+
     @Transactional
-    override suspend fun updatePage(userId: Long, bookReadPageUpdateRequest: BookReadPageUpdateRequest): Unit = coroutineScope {
+    override fun updatePage(userId: Long, bookReadPageUpdateRequest: BookReadPageUpdateRequest) {
         val type = bookReadPageUpdateRequest.type
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadPageUpdateRequest.bookReadLogId)!!
 
-        if (type == PageType.TOTAL)
+        if (type == BookPageType.TOTAL)
             bookReadLog.totalPage = bookReadPageUpdateRequest.page
         else {
             val bookReadProgress = bookReadProgressRepository.findByUserIdAndBookReadLogId(userId, bookReadPageUpdateRequest.bookReadLogId)!!
             bookReadProgress.updateReadPage(bookReadPageUpdateRequest.page, bookReadLog.totalPage)
         }
 
-        // TODO 3개월 지난 사용자는 제거하는 스케줄러
-        // TODO Redis Data 없을 경우, 다시 넣는 조회 로직 만들기
-
-        // 랭킹 업데이트
-        launch {
-            val completedCnt = bookReadProgressRepository.countByUserIdAndProgressAndUpdatedAtGreaterThanEqual(userId, 100, LocalDateTime.now().minusMonths(3))
-
-            // 같은 연령대에서 비교
-//            redisRankingStore.update(userId, )
-        }
     }
 
     @Transactional

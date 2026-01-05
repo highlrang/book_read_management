@@ -6,14 +6,16 @@ import com.auth0.jwt.exceptions.JWTVerificationException
 import com.auth0.jwt.interfaces.DecodedJWT
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import org.springframework.beans.factory.annotation.Value
 import java.util.*
 
 class TokenUtil {
 
     companion object {
 
-        // TODO env
-        const val SECRET_KEY = "abcdefg123!@#"
+        @Value("\${secretKey}")
+        private lateinit var SECRET_KEY: String
+
         const val accessExpTime = 9999999L
 
         fun createToken(userId: Long): String {
