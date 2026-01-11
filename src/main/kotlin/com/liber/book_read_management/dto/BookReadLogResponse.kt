@@ -8,7 +8,7 @@ import java.time.LocalDateTime
 /**
  * 목록용
  */
-class BookReadLogResponse (
+open class BookReadLogResponse (
     var id: Long,
 
     var bookIsbn: String,
@@ -18,6 +18,10 @@ class BookReadLogResponse (
     var bookAuthor: String,
 
     var bookThumbnailImage: String,
+
+    var totalPage: Int?,
+
+    var readPage: Int?,
 
     var readStatus: BookReadStatus,
 
@@ -38,6 +42,8 @@ class BookReadLogResponse (
                 bookTitle = bookReadLog.bookTitle,
                 bookAuthor = bookReadLog.bookAuthor,
                 bookThumbnailImage = bookReadLog.bookThumbnailImage,
+                totalPage = bookReadLog.totalPage,
+                readPage = null,
                 readStatus = bookReadLog.readStatus,
                 progressPercentage = bookReadLog.progressPercentage,
                 createdAt = bookReadLog.createdAt!!,

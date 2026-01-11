@@ -17,6 +17,8 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
+      ddl-auto: create
+
 google:
   ai:
     api-key: ${GEMINI_API_KEY}

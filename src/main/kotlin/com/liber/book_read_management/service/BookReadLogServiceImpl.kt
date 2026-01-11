@@ -52,6 +52,20 @@ class BookReadLogServiceImpl(
         return bookReadLogRepository.findByUserIdAndSearchParam(userId, readLogSearchRequest, pageRequest)
     }
 
+    override fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse {
+        val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, readLogId)
+            ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        val bookReadLogResponse = BookReadLogResponse.from(bookReadLog)
+
+        val bookReadProgress = bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, readLogId)
+        val readPage = bookReadProgress?.readPage
+
+        bookReadLogResponse.readPage = readPage
+
+        return bookReadLogResponse
+    }
+
     @Transactional
     override fun updatePage(userId: Long, bookReadPageUpdateRequest: BookReadPageUpdateRequest) {
         val type = bookReadPageUpdateRequest.type

@@ -6,5 +6,5 @@ import java.time.LocalDateTime
 
 interface BookReadProgressRepository : JpaRepository<BookReadProgress, Long> {
 
-    fun findByUserIdAndBookReadLogId(userId: Long, bookReadLogId: Long): BookReadProgress?
+    fun findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId: Long, bookReadLogId: Long): BookReadProgress?
 }

@@ -33,7 +33,14 @@ class BookReadLogApiController (
     fun getBookReadLogs(@CurrentUserId userId: Long,
                         readLogSearchRequest: BookReadLogSearchRequest,
                         pageRequest: PageRequest) : ResponseEntity<ApiResponse<List<BookReadLogResponse>>> {
-        val bookReadLogResponse = bookReadLogService.searchBookReadLogs(userId, readLogSearchRequest, pageRequest)
+        val bookReadLogResponseList = bookReadLogService.searchBookReadLogs(userId, readLogSearchRequest, pageRequest)
+        return ResponseEntity.ok(ApiResponse.success(bookReadLogResponseList))
+    }
+
+    @GetMapping("/{id}")
+    fun getBookReadLogs(@CurrentUserId userId: Long,
+                        bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogResponse>> {
+        val bookReadLogResponse = bookReadLogService.getBookReadLog(userId, bookReadLogId)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponse))
     }
 
