@@ -9,6 +9,9 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
 
+/**
+ * 언제 어디까지 읽었는지 히스토리로 남기기 위함
+ */
 @Entity
 @Table(name = "BOOK_READ_PROGRESS")
 class BookReadProgress (
@@ -25,24 +28,14 @@ class BookReadProgress (
     @Column(name = "read_page")
     var readPage: Int,
 
-    var progress: Int,
-
 ) : BaseTimeEntity() {
 
-    fun updateReadPage(readPage: Int, totalPage: Int?) {
-        this.readPage = readPage
-        totalPage?.let {
-            this.progress = (readPage.toDouble() / it * 100).toInt()
-        }
-    }
-
     companion object {
-        fun init(userId: Long, bookReadLogId: Long): BookReadProgress {
+        fun of(userId: Long, bookReadLogId: Long, readPage: Int): BookReadProgress {
             return BookReadProgress(
                 userId = userId,
                 bookReadLogId = bookReadLogId,
-                readPage = 0,
-                progress = 0
+                readPage = readPage
             )
         }
     }

@@ -1,11 +1,12 @@
 package com.liber.book_read_management.service
 
 import com.liber.book_read_management.dto.*
+import org.springframework.data.domain.PageRequest
 
 interface BookReadLogService {
 
-    fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : Long
-    fun searchBookReadLogs(userId: Long, readLogSearchRequest: BookReadLogSearchRequest) : List<BookReadLogResponse>
+    fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : BookReadLogResponse
+    fun searchBookReadLogs(userId: Long, readLogSearchRequest: BookReadLogSearchRequest, pageRequest: PageRequest) : List<BookReadLogResponse>
 
     // TODO 서비스 분리
     fun updatePage(userId: Long, readPageUpdateRequest: BookReadPageUpdateRequest)

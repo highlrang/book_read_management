@@ -31,7 +31,7 @@ class BookServiceImpl(
         return PageResponse(
             bookSearchRequest.page,
             bookSearchRequest.size,
-            0, // totalPage,
+            PageResponse.calTotalPage(aladinBookSearchResponse.totalResults, bookSearchRequest.size),
             bookSearchResponseList
         )
     }
