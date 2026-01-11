@@ -1,10 +1,13 @@
 server:
-  port: 8080
+  port: 7070
 
 spring:
+  config:
+    import: env.properties
+
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://book_read_management_db:3306/book_read_management
+    url: jdbc:mysql://mysql:3306/book_read_management
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
 
@@ -22,6 +25,6 @@ google:
 
 client:
   aladin:
-    ttbKey: ttbdevelopoffi2155001
+    ttbKey: ${ALADIN_KEY}
 
-apiKey: abcd1234
+apiKey: ${API_KEY}
