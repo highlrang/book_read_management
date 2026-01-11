@@ -1,9 +1,0 @@
-version: 0.0
-Resources:
-  - TargetService:
-      Type: AWS::ECS::Service
-      Properties:
-        TaskDefinition: "my-task-def"     # CodeDeploy가 새 이미지 반영할 ECS Task Definition
-        LoadBalancerInfo:
-          ContainerName: "spring-app"     # 컨테이너 이름 (task definition에 정의된 이름)
-          ContainerPort: 8080
