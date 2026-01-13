@@ -15,7 +15,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UserServiceImpl(
     private var userRepository: UserRepository,
-    private var bcryptEncoder: BCryptPasswordEncoder
+    private var bcryptEncoder: BCryptPasswordEncoder,
+    private var tokenUtil: TokenUtil
 
 ) : UserService {
 
@@ -37,7 +38,7 @@ class UserServiceImpl(
             addressLongitude = request.addressLongitude
         ))
 
-        val accessToken = TokenUtil.createToken(requireNotNull(user.id))
+        val accessToken = tokenUtil.createToken(requireNotNull(user.id))
         // TODO requireNotNull 또는 TokenUtil.createToken(user.id!!)
         user.accessToken = accessToken
 
@@ -52,7 +53,7 @@ class UserServiceImpl(
         if (!bcryptEncoder.matches(request.password, user.password))
             throw ApiException(ExceptionType.PASSWORD_NOT_MATCHED)
 
-        val accessToken = TokenUtil.createToken(requireNotNull(user.id))
+        val accessToken = tokenUtil.createToken(requireNotNull(user.id))
         user.accessToken = accessToken
 
         return AuthResponse(user.id!!, accessToken)

@@ -46,11 +46,12 @@ object LogUtil {
 
     // ERROR with Exception
     fun logError(ex: Exception) {
-        log.error("[EXCEPTION] $ex")
+        log.error("\n[EXCEPTION] $ex")
         val stackTrace = ex.stackTrace
         if (stackTrace.isNotEmpty()) {
-            val firstStackTrace = stackTrace[0]
-            log.error("\t$firstStackTrace")
+            for (stackTraceElement in stackTrace) {
+                log.error("\n\t$stackTraceElement")
+            }
         }
     }
 

@@ -17,7 +17,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 
 @Component
 class AuthFilter(
-    private var userRepository: UserRepository
+    private var userRepository: UserRepository,
+    private var tokenUtil: TokenUtil
 ) : OncePerRequestFilter() {
 
     @Value("\${apiKey}")
@@ -61,13 +62,13 @@ class AuthFilter(
 
         try {
             token = token.substring("Bearer ".length)
-            val decodedJwt = TokenUtil.verifyToken(token)
+            val decodedJwt = tokenUtil.verifyToken(token)
 
-            val userId: Long = TokenUtil.getUserId(decodedJwt)
+            val userId: Long = tokenUtil.getUserId(decodedJwt)
 
             val user: User = userRepository.findById(userId)
                 .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
-            TokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
+            tokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
 
             RequestContextHolder.currentRequestAttributes()
                 .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)
