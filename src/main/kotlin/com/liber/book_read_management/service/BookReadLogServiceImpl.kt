@@ -13,6 +13,7 @@ import com.liber.book_read_management.repository.BookReviewLogRepository
 import org.springframework.data.domain.PageRequest
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import kotlin.math.roundToInt
 
 @Service
 class BookReadLogServiceImpl(
@@ -75,12 +76,29 @@ class BookReadLogServiceImpl(
 
         if (type == BookPageType.TOTAL) {
             bookReadLog.totalPage = bookReadPageUpdateRequest.page
+            val bookReadProgress = bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(
+                userId, bookReadLogId
+            )
+
+            calculateProgressInt(bookReadLog.totalPage, bookReadProgress?.readPage ?: 0)
+
         } else {
-            bookReadProgressRepository.save(
+            val bookReadProgress = bookReadProgressRepository.save(
                 BookReadProgress.of(userId, bookReadLogId, bookReadPageUpdateRequest.page)
             )
+
+            calculateProgressInt(bookReadLog.totalPage, bookReadProgress.readPage)
         }
 
+    }
+
+    fun calculateProgressInt(totalPage: Int?, readPage: Int?): Int {
+        val total = totalPage ?: 0
+        val read = readPage ?: 0
+
+        if (total <= 0) return 0
+
+        return ((read.toDouble() / total.toDouble()) * 100.0).roundToInt().coerceAtMost(100)
     }
 
     @Transactional
