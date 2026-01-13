@@ -12,15 +12,13 @@ class PageResponse<T>(
 
     companion object {
 
-        fun calTotalPage(totalCount: Int? = 0, size: Int? = 0) : Int {
-            if (size == 0 || totalCount == 0)
-                return 0
+        fun calTotalPage(totalCount: Int?, size: Int?) : Int {
+            val count = totalCount ?: 0
+            val pageSize = size ?: 10
 
-            return if (totalCount!! % size!! == 0) {
-                totalCount / size
-            } else {
-                (totalCount / size) + 1
-            }
+            if (pageSize <= 0 || count <= 0) return 0
+
+            return (count + pageSize - 1) / pageSize
         }
     }
 }

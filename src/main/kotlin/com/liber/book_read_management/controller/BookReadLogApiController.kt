@@ -5,6 +5,7 @@ import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.service.BookReadLogService
 import jakarta.validation.Valid
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -32,7 +33,9 @@ class BookReadLogApiController (
     @GetMapping
     fun getBookReadLogs(@CurrentUserId userId: Long,
                         readLogSearchRequest: BookReadLogSearchRequest,
-                        pageRequest: PageRequest) : ResponseEntity<ApiResponse<List<BookReadLogResponse>>> {
+                        pageable: Pageable
+    ) : ResponseEntity<ApiResponse<List<BookReadLogResponse>>> {
+        val pageRequest = PageRequest.of(pageable.pageNumber, pageable.pageSize, pageable.sort)
         val bookReadLogResponseList = bookReadLogService.searchBookReadLogs(userId, readLogSearchRequest, pageRequest)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponseList))
     }
