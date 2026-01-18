@@ -2,15 +2,19 @@ package com.liber.book_read_management.controller
 
 import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.service.BookService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "책 API", description = "책 관련 API")
 @RestController
 @RequestMapping("/api/v1/book")
 class BookApiController(
     var bookService: BookService
 ) {
 
+    @Operation(summary = "책 검색", description = "검색어로 책을 검색합니다.")
     @GetMapping
     fun searchBook(
         bookSearchRequest: BookSearchRequest
@@ -19,6 +23,7 @@ class BookApiController(
         return ResponseEntity.ok(ApiResponse.success(bookPageResponse))
     }
 
+    @Operation(summary = "책 상세 조회", description = "ISBN으로 책 상세 정보를 조회합니다.")
     @GetMapping("/{isbn}")
     fun getBookDetail(@PathVariable("isbn") isbn: String) : ResponseEntity<ApiResponse<BookDetailResponse>> {
         val bookResponse = bookService.getBookDetail(isbn)

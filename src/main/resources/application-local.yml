@@ -28,3 +28,7 @@ client:
 apiKey: ${API_KEY}
 
 secretKey: ${SECRET_KEY}
+
+logging:
+  level:
+    com.liber.book_read_management.client.AladinClient: DEBUG
