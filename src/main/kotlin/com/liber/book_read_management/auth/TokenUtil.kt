@@ -17,6 +17,8 @@ class TokenUtil(@Value("\${secretKey}") private val secretKey: String) {
     private val keyBytes: ByteArray = Base64.getDecoder().decode(secretKey)
     private val algorithm = Algorithm.HMAC256(keyBytes)
 
+    // TODO Refresh Token
+
     fun createToken(userId: Long): String {
         return JWT.create()
             .withIssuer("my-app")          // 토큰 발급자(iss)

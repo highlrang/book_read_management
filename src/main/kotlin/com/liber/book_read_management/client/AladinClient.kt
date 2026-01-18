@@ -2,6 +2,7 @@ package com.liber.book_read_management.client
 
 import com.liber.book_read_management.dto.aladin.AladinBookDetailResponse
 import com.liber.book_read_management.dto.aladin.AladinBookSearchResponse
+import jakarta.validation.constraints.Max
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -13,12 +14,25 @@ interface AladinClient {
     fun searchItem(
         @RequestParam("Query") query: String?,
         @RequestParam("QueryType") queryType: String = "Title",
-        @RequestParam("MaxResults") maxResult: Int,
-        @RequestParam("start") start: Int,
+        @RequestParam("Start") start: Int,
+        @Max(100) @RequestParam("MaxResults") maxResult: Int,
         @RequestParam("SearchTarget") searchTarget: String = "Book",
+//        @RequestParam("Sort") sort: String? = "PublishTime",
         @RequestParam("Version") version: String = "20131101",
         @RequestParam("Output") output: String = "JS"
     ) : AladinBookSearchResponse
+
+    @GetMapping("/ttb/api/ItemList.aspx")
+    fun getItemList(
+        @RequestParam("QueryType") queryType: String = "BestSeller", // ItemNewSpecial
+        @RequestParam("SearchTarget") searchTarget: String = "Book",
+        @RequestParam("Start") start: Int,
+        @Max(100) @RequestParam("MaxResults") maxResult: Int,
+        @RequestParam("Version") version: String = "20131101",
+        @RequestParam("Output") output: String = "JS"
+    ) : AladinBookSearchResponse
+
+    // TODO CategoryId
 
     @GetMapping("/ttb/api/ItemLookUp.aspx")
     fun getItem(

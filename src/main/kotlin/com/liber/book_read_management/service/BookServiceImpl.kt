@@ -14,11 +14,18 @@ class BookServiceImpl(
 ) : BookService {
 
     override fun searchBook(bookSearchRequest: BookSearchRequest): PageResponse<List<BookSearchResponse>> {
-        val aladinBookSearchResponse = aladinClient.searchItem(
-            query = bookSearchRequest.query,
-            maxResult = bookSearchRequest.size,
-            start = bookSearchRequest.page * bookSearchRequest.size + 1
-        )
+        val aladinBookSearchResponse =
+            if (bookSearchRequest.query == null)
+                aladinClient.getItemList(
+                    maxResult = bookSearchRequest.size,
+                    start = bookSearchRequest.page * bookSearchRequest.size + 1
+                )
+            else
+                aladinClient.searchItem(
+                    query = bookSearchRequest.query,
+                    maxResult = bookSearchRequest.size,
+                    start = bookSearchRequest.page * bookSearchRequest.size + 1
+                )
 
         var bookSearchResponseList : List<BookSearchResponse> = listOf()
         if (!aladinBookSearchResponse.item.isNullOrEmpty()) {

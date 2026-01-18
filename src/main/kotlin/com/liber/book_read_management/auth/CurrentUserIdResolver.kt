@@ -27,7 +27,6 @@ class CurrentUserIdResolver : HandlerMethodArgumentResolver {
         binderFactory: WebDataBinderFactory?
     ): Any? {
         val attrs = RequestContextHolder.currentRequestAttributes()
-        println("userId = " + attrs.getAttribute("userId", RequestAttributes.SCOPE_REQUEST))
         return attrs.getAttribute("userId", RequestAttributes.SCOPE_REQUEST) as? Long
     }
 }

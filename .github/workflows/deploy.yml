@@ -21,7 +21,7 @@ jobs:
           spring.datasource.username: ${{ secrets.DB_USERNAME }}
           spring.datasource.password: ${{ secrets.DB_PASSWORD }}
           google.ai.api-key: ${{ secrets.GEMINI_API_KEY }}
-          client.aladin.ttbkey: ${{ secrets.ALADIN_KEY }}
+          client.aladin.ttbKey: ${{ secrets.ALADIN_KEY }}
           apiKey: ${{ secrets.API_KEY }}
           secretKey: ${{ secrets.SECRET_KEY }}
 

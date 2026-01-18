@@ -8,10 +8,7 @@ import org.springframework.web.bind.annotation.RestController
 
 // TODO
 @RestController
-@RequestMapping("/api/v1/user")
+//@RequestMapping("/api/v1/user")
 class HomeController (val userService: UserService) {
-    @GetMapping
-    fun home() : ResponseEntity<Unit?> {
-        return ResponseEntity.ok(null)
-    }
+
 }

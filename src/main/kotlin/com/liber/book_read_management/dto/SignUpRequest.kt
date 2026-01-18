@@ -15,9 +15,5 @@ class SignUpRequest(
     @Size(max=10)
     var name: String,
     @PhoneNumber
-    var phoneNumber: String,
-    var address: String?,
-    var addressDetail: String?,
-    var addressLatitude: Double?,
-    var addressLongitude: Double?
+    var phoneNumber: String
 )

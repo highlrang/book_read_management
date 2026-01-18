@@ -31,11 +31,7 @@ class UserServiceImpl(
             loginId = request.loginId,
             password = encryptPassword(request.password),
             name = request.name,
-            phoneNumber = request.phoneNumber,
-            address = request.address,
-            addressDetail = request.addressDetail,
-            addressLatitude = request.addressLatitude,
-            addressLongitude = request.addressLongitude
+            phoneNumber = request.phoneNumber
         ))
 
         val accessToken = tokenUtil.createToken(requireNotNull(user.id))
