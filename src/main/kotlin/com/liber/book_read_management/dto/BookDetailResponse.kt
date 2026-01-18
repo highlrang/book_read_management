@@ -3,7 +3,7 @@ package com.liber.book_read_management.dto
 import com.liber.book_read_management.dto.aladin.AladinBookDetailResponse
 import io.swagger.v3.oas.annotations.media.Schema
 
-@Schema(description = "책 상세 응답")
+@Schema(description = "도서 상세 응답")
 class BookDetailResponse (
     @Schema(description = "로고", example = "https://image.aladin.co.kr/img/header/2011/aladin_logo.gif")
     val logo: String?,

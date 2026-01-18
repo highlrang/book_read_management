@@ -40,4 +40,12 @@ class AuthApiController(
         userService.logout(userId)
         return ResponseEntity.ok(ApiResponse.success())
     }
+
+    @Operation(summary = "토큰 재발급", description = "리프레시 토큰으로 액세스 토큰을 재발급합니다.")
+    @PostMapping("/refresh")
+    fun refreshToken(@RequestBody request: RefreshTokenRequest): ResponseEntity<ApiResponse<AuthResponse>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(userService.refreshToken(request.refreshToken))
+        )
+    }
 }

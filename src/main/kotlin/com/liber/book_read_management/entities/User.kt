@@ -1,5 +1,6 @@
 package com.liber.book_read_management.entities
 
+import com.liber.book_read_management.enums.GenderType
 import jakarta.persistence.*
 
 @Entity
@@ -15,6 +16,7 @@ class User (
     var name: String = "",
     @Column(name = "phone_number")
     var phoneNumber: String = "",
+    var gender: GenderType,
     var address: String? = null,
     @Column(name = "address_detail")
     var addressDetail: String? = null,
@@ -24,5 +26,6 @@ class User (
     var addressLongitude: Double? = null,
     @Column(name = "access_token")
     var accessToken: String? = null,
-
+    @Column(name = "refresh_token")
+    var refreshToken: String? = null
 ) : BaseTimeEntity()

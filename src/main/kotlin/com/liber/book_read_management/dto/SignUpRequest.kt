@@ -3,6 +3,7 @@ package com.liber.book_read_management.dto
 import com.liber.book_read_management.annotation.LoginId
 import com.liber.book_read_management.annotation.Password
 import com.liber.book_read_management.annotation.PhoneNumber
+import com.liber.book_read_management.enums.GenderType
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Size
@@ -21,5 +22,7 @@ class SignUpRequest(
     var name: String,
     @PhoneNumber
     @Schema(description = "전화번호", example = "010-1234-5678")
-    var phoneNumber: String
+    var phoneNumber: String,
+    @Schema(description = "성별", example = "F")
+    var gender: GenderType
 )

@@ -3,7 +3,7 @@ package com.liber.book_read_management.dto
 import com.liber.book_read_management.dto.aladin.AladinBookSearchResponse
 import io.swagger.v3.oas.annotations.media.Schema
 
-@Schema(description = "책 검색 응답")
+@Schema(description = "도서 검색 응답")
 class BookSearchResponse(
     @Schema(description = "ISBN", example = "9788960777330")
     var isbn: String?,

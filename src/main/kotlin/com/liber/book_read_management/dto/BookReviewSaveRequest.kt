@@ -3,9 +3,9 @@ package com.liber.book_read_management.dto
 import com.liber.book_read_management.entities.BookReviewLog
 import io.swagger.v3.oas.annotations.media.Schema
 
-@Schema(description = "책 리뷰 저장 요청")
+@Schema(description = "도서 리뷰 저장 요청")
 class BookReviewSaveRequest(
-    @Schema(description = "책 읽기 기록 ID", example = "1")
+    @Schema(description = "도서 읽기 기록 ID", example = "1")
     var bookReadLogId: Long,
     @Schema(description = "읽은 페이지", example = "100")
     var readPage: Int,

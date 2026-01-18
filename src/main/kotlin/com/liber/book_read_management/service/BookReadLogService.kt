@@ -8,8 +8,6 @@ interface BookReadLogService {
     fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : BookReadLogResponse
     fun searchBookReadLogs(userId: Long, readLogSearchRequest: BookReadLogSearchRequest, pageRequest: PageRequest) : List<BookReadLogResponse>
     fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse
-
-    // TODO 서비스 분리
     fun updatePage(userId: Long, readPageUpdateRequest: BookReadPageUpdateRequest)
     fun saveBookReview(userId: Long, reviewSaveRequest: BookReviewSaveRequest)
     fun saveBookRating(userId: Long, ratingSaveRequest: BookRatingSaveRequest)

@@ -35,7 +35,7 @@ class GenAIService (private var client: Client) {
     // TODO RabbitMQ + SAGA 패턴
     // TODO WebSocket & Server Sent Events
 
-    // TODO BookService로 이동
+    // TODO AI Model
     fun makeBookRecommendContent() : Content {
         val readBooks = """
             모순
@@ -43,7 +43,7 @@ class GenAIService (private var client: Client) {
         """.trimIndent()
 
         return Content.fromParts(
-            Part.fromText("너는 도서 추천 어시스턴트야. 내가 읽은 책 기반으로 도서를 3개 추천해줘."),
+            Part.fromText("너는 도서 추천 어시스턴트야. 내가 읽은 도서 기반으로 도서를 3개 추천해줘."),
             Part.fromText(readBooks)
         )
     }

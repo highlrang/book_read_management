@@ -6,7 +6,6 @@ import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 private val log = KotlinLogging.logger {}
 
-// TODO ContentCachingRequestWrapper
 object LogUtil {
 
     // REQUEST

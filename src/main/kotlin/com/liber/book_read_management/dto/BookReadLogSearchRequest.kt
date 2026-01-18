@@ -9,7 +9,7 @@ import org.springframework.data.domain.PageRequest
 import java.time.LocalDate
 import org.springframework.data.domain.Sort.Direction;
 
-@Schema(description = "책 읽기 기록 검색 요청")
+@Schema(description = "도서 읽기 기록 검색 요청")
 @Getter
 @Setter
 @NoArgsConstructor
