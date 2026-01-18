@@ -1,5 +1,6 @@
 package com.liber.book_read_management.auth
 
+import com.liber.book_read_management.config.API_KEY_HEADER
 import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
@@ -14,10 +15,10 @@ import org.springframework.web.context.request.RequestAttributes
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.filter.OncePerRequestFilter
 
-// TODO API Key
 @Component
 class AuthFilter(
-    private var userRepository: UserRepository
+    private var userRepository: UserRepository,
+    private var tokenUtil: TokenUtil
 ) : OncePerRequestFilter() {
 
     @Value("\${apiKey}")
@@ -35,8 +36,7 @@ class AuthFilter(
         }
 
         // API Key 인증
-        // TODO 상수화
-        val apiKey = request.getHeader("API_Key")
+        val apiKey = request.getHeader(API_KEY_HEADER)
         if (apiKey == null) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid api key")
             return
@@ -62,13 +62,13 @@ class AuthFilter(
 
         try {
             token = token.substring("Bearer ".length)
-            val decodedJwt = TokenUtil.verifyToken(token)
+            val decodedJwt = tokenUtil.verifyToken(token)
 
-            val userId: Long = TokenUtil.getUserId(decodedJwt)
+            val userId: Long = tokenUtil.getUserId(decodedJwt)
 
             val user: User = userRepository.findById(userId)
                 .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
-            TokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
+            tokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
 
             RequestContextHolder.currentRequestAttributes()
                 .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)
@@ -91,5 +91,6 @@ class AuthFilter(
     fun isTokenNotRequiredPath(requestUri: String) : Boolean {
         return requestUri.startsWith("/api/v1/auth/sign-up")
                 || requestUri.startsWith("/api/v1/auth/login")
+                || requestUri.startsWith("/api/v1/auth/refresh")
     }
 }

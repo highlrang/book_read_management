@@ -1,14 +1,13 @@
 package com.liber.book_read_management.service
 
-import com.liber.book_read_management.dto.BookRatingSaveRequest
-import com.liber.book_read_management.dto.BookRatingUpdateRequest
-import com.liber.book_read_management.dto.BookReadLogSaveRequest
-import com.liber.book_read_management.dto.BookReadPageUpdateRequest
-import com.liber.book_read_management.dto.BookReviewSaveRequest
+import com.liber.book_read_management.dto.*
+import org.springframework.data.domain.PageRequest
 
 interface BookReadLogService {
 
-    fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : Long
+    fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : BookReadLogResponse
+    fun searchBookReadLogs(userId: Long, readLogSearchRequest: BookReadLogSearchRequest, pageRequest: PageRequest) : List<BookReadLogResponse>
+    fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse
     fun updatePage(userId: Long, readPageUpdateRequest: BookReadPageUpdateRequest)
     fun saveBookReview(userId: Long, reviewSaveRequest: BookReviewSaveRequest)
     fun saveBookRating(userId: Long, ratingSaveRequest: BookRatingSaveRequest)

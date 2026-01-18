@@ -1,18 +1,14 @@
 package com.liber.book_read_management.controller
 
-import org.springframework.beans.factory.annotation.Value
+import com.liber.book_read_management.service.UserService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+// TODO
 @RestController
-class HomeController {
+//@RequestMapping("/api/v1/user")
+class HomeController (val userService: UserService) {
 
-    @Value("\${NAME:GUEST}")
-    private lateinit var NAME: String
-
-    @GetMapping
-    fun home() : ResponseEntity<String> {
-        return ResponseEntity.ok("Hello, $NAME!")
-    }
 }

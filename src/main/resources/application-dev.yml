@@ -2,9 +2,6 @@ server:
   port: 7070
 
 spring:
-  config:
-    import: env.properties
-
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql:3306/book_read_management
@@ -17,8 +14,6 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-NAME: ${MYNAME:GUEST}
-
 google:
   ai:
     api-key: ${GEMINI_API_KEY}
@@ -28,3 +23,5 @@ client:
     ttbKey: ${ALADIN_KEY}
 
 apiKey: ${API_KEY}
+
+secretKey: ${SECRET_KEY}

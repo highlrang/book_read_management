@@ -17,8 +17,18 @@ spring:
         implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
         physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 
-apiKey: abcd1234
-
 google:
   ai:
     api-key: ${GEMINI_API_KEY}
+
+client:
+  aladin:
+    ttbKey: ${ALADIN_KEY}
+
+apiKey: ${API_KEY}
+
+secretKey: ${SECRET_KEY}
+
+logging:
+  level:
+    com.liber.book_read_management.client.AladinClient: DEBUG

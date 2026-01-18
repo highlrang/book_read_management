@@ -1,6 +1,7 @@
 package com.liber.book_read_management.entities
 
 import com.liber.book_read_management.dto.BookReadLogSaveRequest
+import com.liber.book_read_management.enums.BookReadStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -17,9 +18,21 @@ class BookReadLog (
     @Column(name = "user_id")
     var userId : Long,
     @Column(name = "book_isbn")
+
     var bookIsbn: String,
+    @Column(name = "book_title")
+    var bookTitle: String,
+    @Column(name = "book_author")
+    var bookAuthor: String,
+    @Column(name = "book_thumbnail_image")
+    var bookThumbnailImage: String,
+
     @Column(name = "total_page")
-    var totalPage: Int,
+    var totalPage: Int? = null,
+    @Column(name = "read_status")
+    var readStatus: BookReadStatus = BookReadStatus.READING,
+    @Column(name = "progress_percentage")
+    var progressPercentage: Int = 0,
 
 ) : BaseTimeEntity() {
 
@@ -28,7 +41,9 @@ class BookReadLog (
             return BookReadLog(
                 userId = userId,
                 bookIsbn = bookReadLogSaveRequest.bookSbn,
-                totalPage = bookReadLogSaveRequest.totalPage,
+                bookTitle = bookReadLogSaveRequest.bookTitle,
+                bookAuthor = bookReadLogSaveRequest.bookAuthor,
+                bookThumbnailImage = bookReadLogSaveRequest.bookThumbnailImage
             )
         }
     }

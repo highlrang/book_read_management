@@ -39,5 +39,4 @@ out/
 ### Kotlin ###
 .kotlin
 
-.env
-env.properties
+/src/main/resources/env.properties
