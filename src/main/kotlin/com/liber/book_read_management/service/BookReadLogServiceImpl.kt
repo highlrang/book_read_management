@@ -63,6 +63,7 @@ class BookReadLogServiceImpl(
         val readPage = bookReadProgress?.readPage
 
         bookReadLogResponse.readPage = readPage
+        bookReadLogResponse.progressPercentage = calculateProgressInt(bookReadLog.totalPage, readPage)
 
         return bookReadLogResponse
     }
@@ -76,18 +77,11 @@ class BookReadLogServiceImpl(
 
         if (type == BookPageType.TOTAL) {
             bookReadLog.totalPage = bookReadPageUpdateRequest.page
-            val bookReadProgress = bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(
-                userId, bookReadLogId
-            )
-
-            calculateProgressInt(bookReadLog.totalPage, bookReadProgress?.readPage ?: 0)
 
         } else {
-            val bookReadProgress = bookReadProgressRepository.save(
+            bookReadProgressRepository.save(
                 BookReadProgress.of(userId, bookReadLogId, bookReadPageUpdateRequest.page)
             )
-
-            calculateProgressInt(bookReadLog.totalPage, bookReadProgress.readPage)
         }
 
     }

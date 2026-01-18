@@ -2,6 +2,7 @@ package com.liber.book_read_management.repository.query
 
 import com.liber.book_read_management.dto.BookReadLogResponse
 import com.liber.book_read_management.dto.BookReadLogSearchRequest
+import com.liber.book_read_management.dto.QBookReadLogResponse
 import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.QBookReadLog.bookReadLog
 import com.liber.book_read_management.enums.BookReadStatus
@@ -28,8 +29,21 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
 
         val orders = getOrderSpecifiers(pageRequest.sort, BookReadLog::class.java, "bookReadLog")
 
-        // TODO QResponse
-        return jpaQueryFactory.selectFrom(bookReadLog)
+        return jpaQueryFactory.select(
+            QBookReadLogResponse(
+                bookReadLog.id,
+                bookReadLog.bookIsbn,
+                bookReadLog.bookTitle,
+                bookReadLog.bookAuthor,
+                bookReadLog.bookThumbnailImage,
+                bookReadLog.totalPage,
+                bookReadLog.readStatus,
+                bookReadLog.progressPercentage,
+                bookReadLog.createdAt,
+                bookReadLog.updatedAt
+            )
+        )
+            .from(bookReadLog)
             .where(
                 bookReadLog.userId.eq(userId),
                 eqReadStatus(readLogSearchRequest.readStatus),
@@ -39,14 +53,11 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
             .offset(pageRequest.offset)
             .limit(pageRequest.pageSize.toLong())
             .fetch()
-            .stream()
-            .map(BookReadLogResponse::from)
-            .toList()
 
     }
 
     fun eqReadStatus(readStatus: BookReadStatus?) : BooleanExpression? {
-        if (readStatus == null) return null
+        if (readStatus == null || readStatus == BookReadStatus.ALL) return null
 
         return bookReadLog.readStatus.eq(readStatus)
     }

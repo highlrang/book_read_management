@@ -24,7 +24,7 @@ class BookReadLogApiController (
     /**
      * TODO 페이지 갱신 모달창!!
      */
-    @PostMapping("/page")
+    @PatchMapping("/page")
     fun updatePage(@CurrentUserId userId: Long, @Valid @RequestBody readPageUpdateRequest: BookReadPageUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
         bookReadLogService.updatePage(userId, readPageUpdateRequest)
         return ResponseEntity.ok(ApiResponse.success())
