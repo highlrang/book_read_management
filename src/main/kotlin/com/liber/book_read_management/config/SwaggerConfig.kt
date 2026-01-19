@@ -32,7 +32,7 @@ class SwaggerConfig() {
             .termsOfService("")
             .contact(Contact().name("JHHW").url(""))
         val apiKeyScheme: SecurityScheme = SecurityScheme()
-            .name("API_Key")
+            .name("API-Key")
             .type(SecurityScheme.Type.APIKEY)
             .`in`(SecurityScheme.In.HEADER)
             .description("API Key")
@@ -50,10 +50,10 @@ class SwaggerConfig() {
             .info(info)
             .components(
                 Components()
-                    .addSecuritySchemes("API_Key", apiKeyScheme)
+                    .addSecuritySchemes("API-Key", apiKeyScheme)
                     .addSecuritySchemes("bearerAuth", bearerScheme)
             )
-            .addSecurityItem(SecurityRequirement().addList("API_Key"))
+            .addSecurityItem(SecurityRequirement().addList("API-Key"))
             .addSecurityItem(SecurityRequirement().addList("bearerAuth"))
             .addServersItem(server)
     }
