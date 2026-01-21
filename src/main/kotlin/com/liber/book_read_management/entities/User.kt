@@ -16,6 +16,7 @@ class User (
     var name: String = "",
     @Column(name = "phone_number")
     var phoneNumber: String = "",
+    @Enumerated(EnumType.STRING)
     var gender: GenderType,
     var address: String? = null,
     @Column(name = "address_detail")
