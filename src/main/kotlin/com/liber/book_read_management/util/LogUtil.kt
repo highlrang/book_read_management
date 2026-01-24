@@ -1,10 +1,13 @@
 package com.liber.book_read_management.util
 
 import com.liber.book_read_management.exception.ExceptionType
+import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
+import org.slf4j.MDC
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 private val log = KotlinLogging.logger {}
+private val objectMapper = jacksonObjectMapper()
 
 object LogUtil {
 
@@ -36,11 +39,14 @@ object LogUtil {
         }
 
         val body = response.contentAsByteArray.toString(Charsets.UTF_8)
-        log.info("""
-            [RESPONSE] Status: $status
-                Header: $headers
-                Body: $body
-            """)
+        val logMap = LinkedHashMap<String, Any?>()
+        logMap["type"] = "RESPONSE"
+        logMap["status"] = status
+        logMap["headers"] = headers
+        logMap["body"] = body
+        logMap["requestId"] = MDC.get("requestId")
+        logMap["userId"] = MDC.get("userId")
+        log.info(objectMapper.writeValueAsString(logMap))
     }
 
     // ERROR with Exception
