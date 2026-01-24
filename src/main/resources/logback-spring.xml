@@ -42,9 +42,11 @@
             <fieldNames>
                 <timestamp>@timestamp</timestamp>
                 <level>level</level>
-                <logger>logger</logger>
-                <thread>thread</thread>
-                <message>message</message>
+                <message>[ignore]</message>
+                <logger>[ignore]</logger>
+                <thread>[ignore]</thread>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
             </fieldNames>
         </encoder>
     </appender>
