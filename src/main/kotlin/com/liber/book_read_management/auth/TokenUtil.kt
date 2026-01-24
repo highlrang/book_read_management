@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component
 import java.util.*
 
 @Component
-class TokenUtil(@Value("\${secretKey}") private val secretKey: String) {
+class TokenUtil(@Value("\${secretKey}") private val secretKey: String,
+                val logUtil: LogUtil) {
 
     private val keyBytes: ByteArray = Base64.getDecoder().decode(secretKey)
     private val algorithm = Algorithm.HMAC256(keyBytes)
@@ -48,7 +49,7 @@ class TokenUtil(@Value("\${secretKey}") private val secretKey: String) {
             return decodedJWT
 
         } catch (ex: JWTVerificationException) {
-            LogUtil.logError(ex)
+            logUtil.logError(ex)
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
     }

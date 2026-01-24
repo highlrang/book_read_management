@@ -1,15 +1,16 @@
 package com.liber.book_read_management.util
 
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.liber.book_read_management.exception.ExceptionType
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import mu.KotlinLogging
-import org.slf4j.MDC
+import net.logstash.logback.argument.StructuredArguments.entries
+import org.springframework.stereotype.Component
 import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 private val log = KotlinLogging.logger {}
-private val objectMapper = jacksonObjectMapper()
 
-object LogUtil {
+@Component
+class LogUtil(val objectMapper: ObjectMapper) {
 
     // REQUEST
     fun logRequest(request: ContentCachingRequestWrapper) {
@@ -21,12 +22,13 @@ object LogUtil {
             headers[headerName] = request.getHeader(headerName)
         }
         val body = request.contentAsByteArray.toString(Charsets.UTF_8)
-
-        log.info("""
-            [REQUEST] $method $requestUri
-                Header: $headers
-                Body: $body
-        """)
+        val logMap = LinkedHashMap<String, Any?>()
+        logMap["type"] = "REQUEST"
+        logMap["method"] = method
+        logMap["requestUri"] = requestUri
+        logMap["headers"] = headers
+        logMap["body"] = objectMapper.readTree(body)
+        log.info("REQUEST {}", entries(logMap))
     }
 
     // RESPONSE
@@ -43,27 +45,28 @@ object LogUtil {
         logMap["type"] = "RESPONSE"
         logMap["status"] = status
         logMap["headers"] = headers
-        logMap["body"] = body
-        logMap["requestId"] = MDC.get("requestId")
-        logMap["userId"] = MDC.get("userId")
-        log.info(objectMapper.writeValueAsString(logMap))
+        logMap["body"] = objectMapper.readTree(body)
+        log.info("RESPONSE {}", entries(logMap))
     }
 
     // ERROR with Exception
     fun logError(ex: Exception) {
-        log.error("\n[EXCEPTION] $ex")
-        val stackTrace = ex.stackTrace
-        if (stackTrace.isNotEmpty()) {
-            for (stackTraceElement in stackTrace) {
-                log.error("\n\t$stackTraceElement")
-            }
-        }
+        val logMap = LinkedHashMap<String, Any?>()
+        logMap["type"] = "EXCEPTION"
+        logMap["exceptionClass"] = ex::class.qualifiedName
+        logMap["message"] = ex.message
+        log.error("EXCEPTION {}", entries(logMap), ex)
     }
 
     // ERROR with Custom message
     fun logError(exceptionType: ExceptionType, customMessage: String?) {
         var message = exceptionType.message
         if (customMessage != null) message += "    $customMessage"
-        log.error("[EXCEPTION] $message")
+        val logMap = LinkedHashMap<String, Any?>()
+        logMap["type"] = "EXCEPTION"
+        logMap["exceptionType"] = exceptionType.name
+        logMap["code"] = exceptionType.code
+        logMap["message"] = message
+        log.error("EXCEPTION {}", entries(logMap))
     }
 }

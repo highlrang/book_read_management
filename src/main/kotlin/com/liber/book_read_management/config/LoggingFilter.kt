@@ -12,7 +12,7 @@ import org.springframework.web.util.ContentCachingResponseWrapper
 import java.util.*
 
 @Component
-class LoggingFilter : OncePerRequestFilter() {
+class LoggingFilter(val logUtil: LogUtil) : OncePerRequestFilter() {
 
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -26,8 +26,8 @@ class LoggingFilter : OncePerRequestFilter() {
 
         filterChain.doFilter(requestWrapper, responseWrapper)
 
-        LogUtil.logRequest(requestWrapper)
-        LogUtil.logResponse(responseWrapper)
+        logUtil.logRequest(requestWrapper)
+        logUtil.logResponse(responseWrapper)
 
         responseWrapper.copyBodyToResponse()
         MDC.clear()
