@@ -23,6 +23,11 @@ RUN cp build/libs/*.jar app.jar
 FROM eclipse-temurin:17-jre-alpine AS runtime
 WORKDIR /app
 
+# 타임존 설정 (Asia/Seoul)
+RUN apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Seoul /etc/localtime \
+    && echo "Asia/Seoul" > /etc/timezone
+
 # 보안 설정
 RUN addgroup -S spring && adduser -S spring -G spring
 USER spring:spring
