@@ -2,6 +2,7 @@ package com.liber.book_read_management.config
 
 import com.liber.book_read_management.util.LogUtil
 import jakarta.servlet.FilterChain
+import jakarta.servlet.ServletException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.MDC
@@ -11,8 +12,13 @@ import org.springframework.web.util.ContentCachingRequestWrapper
 import org.springframework.web.util.ContentCachingResponseWrapper
 import java.util.*
 
+
 @Component
 class LoggingFilter(val logUtil: LogUtil) : OncePerRequestFilter() {
+    override fun shouldNotFilter(request: HttpServletRequest): Boolean {
+        val path = request.requestURI
+        return !path.startsWith("/api")
+    }
 
     override fun doFilterInternal(
         request: HttpServletRequest,
