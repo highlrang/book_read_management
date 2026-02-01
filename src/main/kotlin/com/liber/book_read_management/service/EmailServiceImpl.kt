@@ -17,7 +17,7 @@ class EmailServiceImpl(
     override fun sendVerificationEmail(email: String) {
         val verificationCode = String.format("%06d", Random().nextInt(1000000))
 
-        authRedisStore.setValue(email, verificationCode)
+        authRedisStore.setEmailVerifyCode(email, verificationCode)
 
         val verificationUrl = "${myDomain}/auth/verify-email?email=${email}&code=${verificationCode}"
 
@@ -38,7 +38,7 @@ class EmailServiceImpl(
                 <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%" style="max-width: 600px; margin: 40px auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
                     <tr>
                         <td style="padding: 40px 20px; text-align: center; background-color: #4A90E2;">
-                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">서비스 이름</h1>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 700;">한장해(로고 추가)</h1>
                         </td>
                     </tr>
                     
@@ -62,8 +62,7 @@ class EmailServiceImpl(
                     
                     <tr>
                         <td style="padding: 20px; text-align: center; background-color: #f9fafb; color: #aaaaaa; font-size: 12px;">
-                            © 2026 서비스이름. All rights reserved.<br>
-                            서울특별시 어딘가 구 무엇동 123-45
+                            © 2026 병아리컴퍼니. All rights reserved.<br>
                         </td>
                     </tr>
                 </table>

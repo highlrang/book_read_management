@@ -15,8 +15,8 @@ class User (
     var password: String = "",
     @Column(name = "nickname")
     var nickname: String = "",
-    @Column(name = "photo_url")
-    var profilePhotoId: Long? = null,
+    @Column(name = "photo_id")
+    var photoId: Long? = null,
 //    var address: String? = null,
 //    @Column(name = "address_detail")
 //    var addressDetail: String? = null,

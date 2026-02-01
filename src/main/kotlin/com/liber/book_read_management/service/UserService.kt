@@ -12,4 +12,5 @@ interface UserService {
     fun logout(userId: Long)
     fun refreshToken(refreshToken: String): AuthResponse
     fun updatePassword(request: UpdatePasswordRequest)
+    fun verifyEmail(email: String, code: String)
 }

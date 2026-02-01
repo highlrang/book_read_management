@@ -85,6 +85,7 @@ class AuthFilter(
     fun isApiKeyNotRequiredPath(requestUri: String) : Boolean {
         return requestUri.startsWith("/swagger-ui")
             || requestUri.startsWith("/v3/api-docs")
+            || requestUri.startsWith("/auth/verify-email")
             || requestUri.startsWith("/email_verified.html")
             || requestUri.startsWith("/error.html")
             || requestUri == "/"
@@ -96,5 +97,6 @@ class AuthFilter(
                 || requestUri.startsWith("/api/v1/auth/refresh")
                 || requestUri.startsWith("/api/v1/auth/send-verification-email")
                 || requestUri.startsWith("/api/v1/files")
+                || requestUri.startsWith("/api/v1/auth/password")
     }
 }

@@ -9,6 +9,7 @@ import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import com.liber.book_read_management.repository.UserRepository
+import com.liber.book_read_management.repository.redis.AuthRedisStore
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -17,21 +18,24 @@ import org.springframework.transaction.annotation.Transactional
 class UserServiceImpl(
     private var userRepository: UserRepository,
     private var bcryptEncoder: BCryptPasswordEncoder,
-    private var tokenUtil: TokenUtil
+    private var tokenUtil: TokenUtil,
+    private var authRedisStore: AuthRedisStore
 ) : UserService {
 
     @Transactional
     override fun signUp(request: SignUpRequest): AuthResponse {
         val existUser = userRepository.findByEmail(request.email)
         if (existUser != null) {
-            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+            throw ApiException(ExceptionType.ALREADY_EXIST)
         }
+
+        authRedisStore.checkVerifiedEmail(request.email)
 
         val user = userRepository.save(User(
             email = request.email,
             password = encryptPassword(request.password),
             nickname = request.nickname,
-            profilePhotoId = request.photoId
+            photoId = request.photoId
         ))
         val userId = user.id!!
         val accessToken = tokenUtil.createAccessToken(userId)
@@ -88,6 +92,13 @@ class UserServiceImpl(
         val user = userRepository.findByEmail(request.email)
             ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
         user.password = encryptPassword(request.password)
+    }
+
+    override fun verifyEmail(email: String, code: String) {
+        val savedCode = authRedisStore.getEmailVerifyCode(email)
+        if (savedCode != code)
+            throw ApiException(ExceptionType.VALIDATION_ERROR)
+        authRedisStore.setVerifiedEmail(email)
     }
 
     fun encryptPassword(password: String) : String {
