@@ -3,11 +3,11 @@ package com.liber.book_read_management.annotation
 import jakarta.validation.ConstraintValidator
 import jakarta.validation.ConstraintValidatorContext
 
-class LoginIdValidator : ConstraintValidator<LoginId, String> {
+class EmailValidator : ConstraintValidator<Email, String> {
 
-    val LOGIN_PATTERN = Regex.fromLiteral("^(?=.*[A-Za-z])(?=.*\\d)[A-Za-z\\d]{6,}\$")
+    val EMAIL_PATTERN = Regex.fromLiteral("^[a-zA-Z0-9_!#\$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+\$")
     override fun isValid(value: String?, context: ConstraintValidatorContext?): Boolean {
-        return !(value == null || !value.matches(LOGIN_PATTERN))
+        return !(value == null || !value.matches(EMAIL_PATTERN))
     }
 
 }
