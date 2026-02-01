@@ -8,9 +8,6 @@ spring:
   datasource:
     url: jdbc:mysql://localhost:3306/read_log_db
 
-  mail:
-    username: developoffi@gmail.com
-
   data:
     redis:
       host: 117.52.84.99
