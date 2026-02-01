@@ -1,40 +1,41 @@
 package com.liber.book_read_management.service
 
 import com.liber.book_read_management.auth.TokenUtil
-import com.liber.book_read_management.config.REFRESH_TOKEN_EXPIRATION_TIME
 import com.liber.book_read_management.dto.AuthResponse
 import com.liber.book_read_management.dto.LoginRequest
 import com.liber.book_read_management.dto.SignUpRequest
+import com.liber.book_read_management.dto.UpdatePasswordRequest
 import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
-import com.liber.book_read_management.repository.RedisTemplateRepository
 import com.liber.book_read_management.repository.UserRepository
+import com.liber.book_read_management.repository.redis.AuthRedisStore
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.util.concurrent.TimeUnit
 
 @Service
 class UserServiceImpl(
     private var userRepository: UserRepository,
     private var bcryptEncoder: BCryptPasswordEncoder,
-    private var tokenUtil: TokenUtil
+    private var tokenUtil: TokenUtil,
+    private var authRedisStore: AuthRedisStore
 ) : UserService {
 
     @Transactional
     override fun signUp(request: SignUpRequest): AuthResponse {
-        val existUser = userRepository.findByLoginId(request.loginId)
+        val existUser = userRepository.findByEmail(request.email)
         if (existUser != null) {
-            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+            throw ApiException(ExceptionType.ALREADY_EXIST)
         }
 
+        authRedisStore.checkVerifiedEmail(request.email)
+
         val user = userRepository.save(User(
-            loginId = request.loginId,
+            email = request.email,
             password = encryptPassword(request.password),
-            name = request.name,
-            phoneNumber = request.phoneNumber,
-            gender = request.gender
+            nickname = request.nickname,
+            photoId = request.photoId
         ))
         val userId = user.id!!
         val accessToken = tokenUtil.createAccessToken(userId)
@@ -47,7 +48,7 @@ class UserServiceImpl(
 
     @Transactional
     override fun login(request: LoginRequest) : AuthResponse {
-        val user = userRepository.findByLoginId(request.loginId) ?:
+        val user = userRepository.findByEmail(request.email) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         if (!bcryptEncoder.matches(request.password, user.password))
@@ -84,6 +85,20 @@ class UserServiceImpl(
         user.refreshToken = newRefreshToken
 
         return AuthResponse(user.id!!, newAccessToken, newRefreshToken)
+    }
+
+    @Transactional
+    override fun updatePassword(request: UpdatePasswordRequest) {
+        val user = userRepository.findByEmail(request.email)
+            ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
+        user.password = encryptPassword(request.password)
+    }
+
+    override fun verifyEmail(email: String, code: String) {
+        val savedCode = authRedisStore.getEmailVerifyCode(email)
+        if (savedCode != code)
+            throw ApiException(ExceptionType.VALIDATION_ERROR)
+        authRedisStore.setVerifiedEmail(email)
     }
 
     fun encryptPassword(password: String) : String {

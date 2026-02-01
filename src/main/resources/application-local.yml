@@ -6,28 +6,20 @@ spring:
     import: env.properties
 
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://localhost:3306/read_log_db
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
 
-  jpa:
-    hibernate:
-      naming:
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  mail:
+    username: developoffi@gmail.com
 
-google:
-  ai:
-    api-key: ${GEMINI_API_KEY}
+  data:
+    redis:
+      host: 117.52.84.99
+      port: 16379
 
-client:
-  aladin:
-    ttbKey: ${ALADIN_KEY}
+myDomain: "http://localhost:9090"
 
-apiKey: ${API_KEY}
-
-secretKey: ${SECRET_KEY}
+file:
+  upload-dir: /Users/hwjeong/IdeaProjects/book_read_management/src/main/resources/upload
 
 logging:
   level:

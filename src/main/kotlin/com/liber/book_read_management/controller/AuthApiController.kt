@@ -2,6 +2,7 @@ package com.liber.book_read_management.controller;
 
 import com.liber.book_read_management.auth.CurrentUserId
 import com.liber.book_read_management.dto.*
+import com.liber.book_read_management.service.EmailService
 import com.liber.book_read_management.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -15,7 +16,8 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/auth")
 class AuthApiController(
-    private val userService: UserService
+    private val userService: UserService,
+    private val emailService: EmailService
 ) {
 
     @Operation(summary = "회원가입", description = "사용자 정보를 입력받아 회원가입을 처리합니다.")
@@ -26,7 +28,7 @@ class AuthApiController(
         )
     }
 
-    @Operation(summary = "로그인", description = "로그인 아이디와 비밀번호를 입력받아 로그인을 처리합니다.")
+    @Operation(summary = "로그인", description = "이메일과 비밀번호를 입력받아 로그인을 처리합니다.")
     @PostMapping("/login")
     fun login(@RequestBody request: LoginRequest): ResponseEntity<ApiResponse<AuthResponse>> {
         return ResponseEntity.ok(
@@ -48,4 +50,20 @@ class AuthApiController(
             ApiResponse.success(userService.refreshToken(request.refreshToken))
         )
     }
+
+    @Operation(summary = "인증 메일 발송", description = "인증 메일을 발송합니다.")
+    @PostMapping("/send-verification-email")
+    fun sendVerificationEmail(@RequestBody request: SendEmailRequest): ResponseEntity<ApiResponse<Unit>> {
+        emailService.sendVerificationEmail(request.email)
+        return ResponseEntity.ok(ApiResponse.success())
+    }
+
+    @Operation(summary = "비밀번호 변경", description = "비밀번호를 변경합니다.")
+    @PostMapping("/password")
+    fun updatePassword(@RequestBody request: UpdatePasswordRequest): ResponseEntity<ApiResponse<Unit>> {
+        userService.updatePassword(request)
+        return ResponseEntity.ok(ApiResponse.success())
+    }
+
 }
+

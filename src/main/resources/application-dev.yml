@@ -3,25 +3,14 @@ server:
 
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://mysql:3306/book_read_management
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
 
-  jpa:
-    hibernate:
-      naming:
-        implicit-strategy: org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy
-        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  data:
+    redis:
+      host: redis_dev
+      port: 6379
 
-google:
-  ai:
-    api-key: ${GEMINI_API_KEY}
+myDomain: "http://117.52.84.99:7070"
 
-client:
-  aladin:
-    ttbKey: ${ALADIN_KEY}
-
-apiKey: ${API_KEY}
-
-secretKey: ${SECRET_KEY}
+file:
+  upload-dir: /app/uploads

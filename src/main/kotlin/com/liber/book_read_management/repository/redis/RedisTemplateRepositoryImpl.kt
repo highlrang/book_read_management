@@ -1,4 +1,4 @@
-package com.liber.book_read_management.repository
+package com.liber.book_read_management.repository.redis
 
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Repository

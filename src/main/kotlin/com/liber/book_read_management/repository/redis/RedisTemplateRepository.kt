@@ -1,4 +1,4 @@
-package com.liber.book_read_management.repository
+package com.liber.book_read_management.repository.redis
 
 interface RedisTemplateRepository {
 
