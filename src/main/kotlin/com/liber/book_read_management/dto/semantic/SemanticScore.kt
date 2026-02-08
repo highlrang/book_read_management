@@ -1,4 +1,4 @@
-package com.ollama.semantic_api.dto
+package com.liber.book_read_management.dto.semantic
 
 data class SemanticScore(
     val abstraction: Double,
