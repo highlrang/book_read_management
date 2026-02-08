@@ -43,3 +43,5 @@ client:
 apiKey: ${API_KEY}
 
 secretKey: ${SECRET_KEY}
+
+ollamaDomain: ""

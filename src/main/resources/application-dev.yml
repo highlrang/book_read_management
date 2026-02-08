@@ -11,6 +11,7 @@ spring:
       port: 6379
 
 myDomain: "http://117.52.84.99:7070"
+ollamaDomain: "http://semantic-api:7071"
 
 file:
   upload-dir: /app/uploads
