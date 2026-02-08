@@ -4,15 +4,13 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.web.reactive.function.client.WebClient
+import java.net.http.HttpClient
 
 @Configuration
-class OllamaClientConfig(
-    @Value("\${ollamaDomain}")
-    private val ollamaDomain: String
+class HttpClientConfig(
 ) {
-
     @Bean
-    fun webClient(builder: WebClient.Builder): WebClient {
-        return builder.baseUrl(ollamaDomain).build()
+    fun httpClient(): HttpClient {
+        return HttpClient.newHttpClient()
     }
 }
