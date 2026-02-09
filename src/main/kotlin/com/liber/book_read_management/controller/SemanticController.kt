@@ -36,7 +36,7 @@ class SemanticController(
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, request.bookReadLogId)
             ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        val reviews = bookReadReviewRepository.findAllByUser_Id(userId);
+        val reviews = bookReadReviewRepository.findAllByBookReadLogId(bookReadLog.id!!);
 
         val bookInfoRequest = BookInfoRequest(
             title = bookReadLog.bookTitle,
