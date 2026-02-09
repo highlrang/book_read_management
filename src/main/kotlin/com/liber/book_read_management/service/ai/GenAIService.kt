@@ -65,7 +65,7 @@ class GenAIService(private var client: Client) {
             .build()
 
         val response = client.models.generateContent(
-            "gemini-1.5-pro",
+            "gemini-1.0-pro",
             prompt,
             config
         )
@@ -95,7 +95,7 @@ class GenAIService(private var client: Client) {
             .build()
 
         val response = client.models.generateContent(
-            "gemini-1.5-pro",
+            "gemini-1.0-pro",
             prompt,
             config
         )
