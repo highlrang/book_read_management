@@ -1,20 +1,19 @@
 package com.liber.book_read_management.service.ai
 
 import com.fasterxml.jackson.core.type.TypeReference
-import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.google.genai.Client
+import com.google.genai.types.GenerateContentConfig
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
 import com.liber.book_read_management.dto.semantic.SemanticScore
+import com.liber.book_read_management.exception.ApiException
+import com.liber.book_read_management.exception.ExceptionType
 import lombok.RequiredArgsConstructor
 import org.springframework.stereotype.Service
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
 
 @Service
 @RequiredArgsConstructor
-class GenAIService (private var client: HttpClient) {
+class GenAIService(private var client: Client) {
 
     fun getBookSearchQuery(bookInfoRequest: BookInfoRequest): List<String> {
 
@@ -62,29 +61,19 @@ class GenAIService (private var client: HttpClient) {
 
         """.trimIndent()
 
-        val body = """
-            {
-              "model": "mistral",
-              "stream": false,
-              "prompt": ${ObjectMapper().writeValueAsString(prompt)}
-            }
-
-        """.trimIndent()
-
-        val request: HttpRequest = HttpRequest.newBuilder()
-            .uri(URI.create("http://host.docker.internal:11434Ï/api/generate"))
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(body))
+        val config = GenerateContentConfig.builder()
             .build()
 
-        val response: HttpResponse<String> = client.send(request, HttpResponse.BodyHandlers.ofString())
+        val response = client.models.generateContent(
+            "gemini-1.5-pro",
+            prompt,
+            config
+        )
 
-        // 1차 파싱
-        val root: JsonNode = ObjectMapper().readTree(response.body())
-        val jsonText: String = root.get("response").asText()
+        val text = response.text()
+            ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
 
-        // 2차 파싱 (이게 진짜 의미 JSON)
-        val semanticScore = ObjectMapper().readValue(jsonText, SemanticScore::class.java)
+        val semanticScore = ObjectMapper().readValue(text, SemanticScore::class.java)
 
         return generateAladdinQueries(semanticScore)
     }
@@ -102,14 +91,19 @@ class GenAIService (private var client: HttpClient) {
             예: ["양자역학 전문 서적", "철학적 에세이", "현대 물리학 원리"]
         """.trimIndent()
 
-        val request: HttpRequest = HttpRequest.newBuilder()
-            .uri(URI.create("http://host.docker.internal:11434Ï/api/generate"))
-            .header("Content-Type", "application/json")
-            .POST(HttpRequest.BodyPublishers.ofString(prompt))
+        val config = GenerateContentConfig.builder()
             .build()
 
-        val response = client.send(request, HttpResponse.BodyHandlers.ofString())
-        return ObjectMapper().readValue(response.body(),  object : TypeReference<List<String>>() {})
+        val response = client.models.generateContent(
+            "gemini-1.5-pro",
+            prompt,
+            config
+        )
+
+        val text = response.text()
+            ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
+
+        return ObjectMapper().readValue(text, object : TypeReference<List<String>>() {})
 
     }
 }
