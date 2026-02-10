@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service
 
 @Service
 @RequiredArgsConstructor
-class GenAIService(private var client: Client) {
+class GenAIService(private var client: Client, private val objectMapper: ObjectMapper) {
 
     fun getBookSearchQuery(bookInfoRequest: BookInfoRequest): List<String> {
 
@@ -53,7 +53,7 @@ class GenAIService(private var client: Client) {
 
         """.trimIndent()
 
-        val schemaJsonString = ObjectMapper().writeValueAsString(SemanticScoreSchema())
+        val schemaJsonString = objectMapper.writeValueAsString(SemanticScoreSchema())
         val semanticScoreSchema = Schema.fromJson(schemaJsonString)
 
         val config = GenerateContentConfig.builder()
@@ -70,7 +70,7 @@ class GenAIService(private var client: Client) {
         val text = response.text()
             ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
 
-        val semanticScore = ObjectMapper().readValue(text, SemanticScore::class.java)
+        val semanticScore = objectMapper.readValue(text, SemanticScore::class.java)
 
         return generateAladdinQueries(semanticScore)
     }
@@ -100,7 +100,7 @@ class GenAIService(private var client: Client) {
         val text = response.text()
             ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
 
-        return ObjectMapper().readValue(text, object : TypeReference<List<String>>() {})
+        return objectMapper.readValue(text, object : TypeReference<List<String>>() {})
 
     }
 }
