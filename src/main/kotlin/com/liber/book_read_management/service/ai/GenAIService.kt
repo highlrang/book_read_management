@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.google.genai.Client
 import com.google.genai.types.GenerateContentConfig
+import com.google.genai.types.Schema
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
 import com.liber.book_read_management.dto.semantic.SemanticScore
+import com.liber.book_read_management.dto.semantic.SemanticScoreSchema
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import lombok.RequiredArgsConstructor
@@ -49,19 +51,14 @@ class GenAIService(private var client: Client) {
             리뷰:
             $reviewsText
 
-            반드시 아래 JSON 형식으로만 출력하라. 설명 문장은 포함하지 마라.
-
-            {
-              "abstraction": 0.0,
-              "emotion": 0.0,
-              "challenge": 0.0,
-              "narrative": 0.0,
-              "confidence": 0.0
-            }
-
         """.trimIndent()
 
+        val schemaJsonString = ObjectMapper().writeValueAsString(SemanticScoreSchema())
+        val semanticScoreSchema = Schema.fromJson(schemaJsonString)
+
         val config = GenerateContentConfig.builder()
+            .responseMimeType("application/json")
+            .responseSchema(semanticScoreSchema)
             .build()
 
         val response = client.models.generateContent(
