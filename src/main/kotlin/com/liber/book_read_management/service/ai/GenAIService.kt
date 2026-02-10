@@ -78,11 +78,11 @@ class GenAIService(private var client: Client) {
     fun generateAladdinQueries(score: SemanticScore): List<String> {
         val prompt = """
             사용자의 도서 취향 점수(0.0~1.0):
-            - 추상성(abstraction): ${score.abstraction}
-            - 감정성(emotion): ${score.emotion}
-            - 도전성(challenge): ${score.challenge}
-            - 서사성(narrative): ${score.narrative}
-            - 확신도(confidence): ${score.confidence}
+            - 추상성(abstraction): ${score.abstraction ?: "-"}
+            - 감정성(emotion): ${score.emotion ?: "-"}
+            - 도전성(challenge): ${score.challenge ?: "-"}
+            - 서사성(narrative): ${score.narrative ?: "-"}
+            - 확신도(confidence): ${score.confidence ?: "-"}
 
             이 점수에 가장 잘 어울리는 도서를 찾기 위한 한국어 검색 키워드 3개를 JSON 리스트 형식으로만 답변해줘.
             예: ["양자역학 전문 서적", "철학적 에세이", "현대 물리학 원리"]
@@ -92,7 +92,7 @@ class GenAIService(private var client: Client) {
             .build()
 
         val response = client.models.generateContent(
-            "gemini-1.0-pro",
+            "gemini-2.0-flash",
             prompt,
             config
         )
