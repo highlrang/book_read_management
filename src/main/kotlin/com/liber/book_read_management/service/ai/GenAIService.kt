@@ -65,7 +65,7 @@ class GenAIService(private var client: Client) {
             .build()
 
         val response = client.models.generateContent(
-            "gemini-1.0-pro",
+            "gemini-2.0-flash",
             prompt,
             config
         )
