@@ -75,6 +75,15 @@ class GenAIService(private var client: Client, private val objectMapper: ObjectM
         return generateAladdinQueries(semanticScore)
     }
 
+    data class ArraySchema(
+        val type: String = "array",
+        val items: ItemSchema = ItemSchema()
+    )
+
+    data class ItemSchema(
+        val type: String = "string"
+    )
+
     fun generateAladdinQueries(score: SemanticScore): List<String> {
         val prompt = """
             사용자의 도서 취향 점수(0.0~1.0):
@@ -88,7 +97,12 @@ class GenAIService(private var client: Client, private val objectMapper: ObjectM
             예: ["양자역학 전문 서적", "철학적 에세이", "현대 물리학 원리"]
         """.trimIndent()
 
+        val schemaJson = objectMapper.writeValueAsString(ArraySchema())
+        val responseSchema = Schema.fromJson(schemaJson)
+
         val config = GenerateContentConfig.builder()
+            .responseMimeType("application/json")
+            .responseSchema(responseSchema)
             .build()
 
         val response = client.models.generateContent(
@@ -100,7 +114,10 @@ class GenAIService(private var client: Client, private val objectMapper: ObjectM
         val text = response.text()
             ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
 
-        return objectMapper.readValue(text, object : TypeReference<List<String>>() {})
+        return objectMapper.readValue(
+            text,
+            object : TypeReference<List<String>>() {}
+        )
 
     }
 }
