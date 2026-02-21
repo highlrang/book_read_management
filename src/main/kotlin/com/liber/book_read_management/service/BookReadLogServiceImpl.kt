@@ -113,39 +113,42 @@ class BookReadLogServiceImpl(
     @Transactional
     override fun saveBookReview(
         userId: Long,
+        bookReadLogId: Long,
         reviewSaveRequest: BookReviewSaveRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, reviewSaveRequest.bookReadLogId) ?:
+        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        bookReviewLogRepository.save(reviewSaveRequest.toEntity(userId))
+        bookReviewLogRepository.save(reviewSaveRequest.toEntity(userId, bookReadLogId))
     }
 
     @Transactional
     override fun saveBookRating(
         userId: Long,
+        bookReadLogId: Long,
         ratingSaveRequest: BookRatingSaveRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, ratingSaveRequest.bookReadLogId) ?:
+        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId( ratingSaveRequest.bookReadLogId)
+        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId(bookReadLogId)
         if (bookRatingLog != null)
             throw ApiException(ExceptionType.ALREADY_EXIST)
 
-        bookRatingLogRepository.save(ratingSaveRequest.toEntity())
+        bookRatingLogRepository.save(ratingSaveRequest.toEntity(bookReadLogId))
 
     }
 
     @Transactional
     override fun updateBookRating(
         userId: Long,
+        bookReadLogId: Long,
         ratingUpdateRequest: BookRatingUpdateRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, ratingUpdateRequest.bookReadLogId) ?:
+        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId( ratingUpdateRequest.bookReadLogId) ?:
+        val bookRatingLog = bookRatingLogRepository.findByBookReadLogId(bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         bookRatingLog.update(ratingUpdateRequest.rating, ratingUpdateRequest.content)

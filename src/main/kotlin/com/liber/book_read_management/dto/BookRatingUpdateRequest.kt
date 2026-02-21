@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Min
 
 @Schema(description = "도서 평점 수정 요청")
 class BookRatingUpdateRequest(
-    @Schema(description = "도서 읽기 기록 ID", example = "1")
-    val bookReadLogId: Long,
     @Min(0) @Max(5)
     @Schema(description = "평점", example = "3")
     val rating: Int?,

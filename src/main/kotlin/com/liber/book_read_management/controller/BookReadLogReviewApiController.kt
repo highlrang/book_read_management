@@ -24,9 +24,11 @@ class BookReadLogReviewApiController(
 ) {
 
     @Operation(summary = "도서 리뷰 저장", description = "도서 페이지와 함께 리뷰를 저장합니다.")
-    @PostMapping("/review")
-    fun saveReview(@CurrentUserId userId: Long, @Valid @RequestBody reviewSaveRequest: BookReviewSaveRequest) : ResponseEntity<ApiResponse<Unit>> {
-        bookReadLogService.saveBookReview(userId, reviewSaveRequest)
+    @PostMapping("/review/{bookReadLogId}")
+    fun saveReview(@CurrentUserId userId: Long,
+                   @PathVariable bookReadLogId: Long,
+                   @Valid @RequestBody reviewSaveRequest: BookReviewSaveRequest) : ResponseEntity<ApiResponse<Unit>> {
+        bookReadLogService.saveBookReview(userId, bookReadLogId, reviewSaveRequest)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
