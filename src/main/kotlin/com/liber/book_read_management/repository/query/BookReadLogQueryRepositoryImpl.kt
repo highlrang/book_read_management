@@ -50,6 +50,7 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
             .from(bookReadLog)
             .where(
                 bookReadLog.userId.eq(userId),
+                containsSearchValue(readLogSearchRequest.searchValue),
                 eqReadStatus(readLogSearchRequest.readStatus),
                 betweenDate(readLogSearchRequest.startDate, readLogSearchRequest.endDate)
             )
@@ -67,6 +68,14 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
             )
 
         return PageableExecutionUtils.getPage(content, pageable) { countQuery.fetchOne() ?: 0L }
+    }
+
+    private fun containsSearchValue(searchValue: String?): BooleanExpression? {
+        if (searchValue.isNullOrBlank()) {
+            return null
+        }
+
+        return bookReadLog.bookTitle.contains(searchValue).or(bookReadLog.bookAuthor.contains(searchValue))
     }
 
     fun eqReadStatus(readStatus: BookReadStatus?) : BooleanExpression? {
