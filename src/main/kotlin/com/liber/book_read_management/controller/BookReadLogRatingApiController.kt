@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*
 @Tag(name = "도서 평점 API", description = "완독 후 도서 평점 관련 API")
 @RestController
 @RequestMapping("/api/v1/book-read")
-class BookReadLogRatingController(
+class BookReadLogRatingApiController(
     val bookReadLogService: BookReadLogService
 ) {
 

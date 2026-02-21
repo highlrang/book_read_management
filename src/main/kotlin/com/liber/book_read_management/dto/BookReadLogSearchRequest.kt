@@ -14,6 +14,8 @@ import org.springframework.data.domain.Sort.Direction;
 @Setter
 @NoArgsConstructor
 class BookReadLogSearchRequest(
+    @Schema(description = "검색어", example = "해리포터")
+    val searchValue: String,
     @Schema(description = "읽기 상태", example = "ALL")
     val readStatus: BookReadStatus,
     @Schema(description = "검색 시작일", example = "2026-01-01")

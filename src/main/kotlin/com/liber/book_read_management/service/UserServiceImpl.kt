@@ -1,10 +1,7 @@
 package com.liber.book_read_management.service
 
 import com.liber.book_read_management.auth.TokenUtil
-import com.liber.book_read_management.dto.AuthResponse
-import com.liber.book_read_management.dto.LoginRequest
-import com.liber.book_read_management.dto.SignUpRequest
-import com.liber.book_read_management.dto.UpdatePasswordRequest
+import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
@@ -21,6 +18,10 @@ class UserServiceImpl(
     private var tokenUtil: TokenUtil,
     private var authRedisStore: AuthRedisStore
 ) : UserService {
+
+    override fun checkNickname(nickname: String): NicknameCheckResponse {
+        return NicknameCheckResponse(!userRepository.existsByNickname(nickname))
+    }
 
     @Transactional
     override fun signUp(request: SignUpRequest): AuthResponse {

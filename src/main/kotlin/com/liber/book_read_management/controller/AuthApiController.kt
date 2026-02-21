@@ -20,6 +20,15 @@ class AuthApiController(
     private val emailService: EmailService
 ) {
 
+    @Operation(summary = "닉네임 중복 확인")
+    @PostMapping("/nickname/check")
+    fun checkNickname(@RequestBody request: NicknameCheckRequest) : ResponseEntity<ApiResponse<NicknameCheckResponse>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(userService.checkNickname(request.nickname))
+        )
+    }
+
+
     @Operation(summary = "회원가입", description = "사용자 정보를 입력받아 회원가입을 처리합니다.")
     @PostMapping("/sign-up")
     fun signUp(@RequestBody request: SignUpRequest): ResponseEntity<ApiResponse<AuthResponse>> {

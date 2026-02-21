@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/v1/semantic")
 @RequiredArgsConstructor
-class SemanticController(
+class SemanticApiController(
     private val semanticService: SemanticService,
     private val bookReadLogRepository: BookReadLogRepository,
     private val bookReadReviewRepository: BookReviewLogRepository,
@@ -36,7 +36,7 @@ class SemanticController(
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, request.bookReadLogId)
             ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        val reviews = bookReadReviewRepository.findAllByBookReadLogId(bookReadLog.id!!);
+        val reviews = bookReadReviewRepository.findAllByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLog.id!!);
 
         val bookInfoRequest = BookInfoRequest(
             title = bookReadLog.bookTitle,

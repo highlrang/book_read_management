@@ -92,7 +92,8 @@ class AuthFilter(
     }
 
     fun isTokenNotRequiredPath(requestUri: String) : Boolean {
-        return requestUri.startsWith("/api/v1/auth/sign-up")
+        return requestUri.startsWith("/api/v1/auth/nickname/check")
+                || requestUri.startsWith("/api/v1/auth/sign-up")
                 || requestUri.startsWith("/api/v1/auth/login")
                 || requestUri.startsWith("/api/v1/auth/refresh")
                 || requestUri.startsWith("/api/v1/auth/send-verification-email")

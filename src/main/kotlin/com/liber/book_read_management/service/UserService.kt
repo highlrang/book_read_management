@@ -1,9 +1,6 @@
 package com.liber.book_read_management.service
 
-import com.liber.book_read_management.dto.AuthResponse
-import com.liber.book_read_management.dto.LoginRequest
-import com.liber.book_read_management.dto.SignUpRequest
-import com.liber.book_read_management.dto.UpdatePasswordRequest
+import com.liber.book_read_management.dto.*
 
 interface UserService {
 
@@ -13,4 +10,6 @@ interface UserService {
     fun refreshToken(refreshToken: String): AuthResponse
     fun updatePassword(request: UpdatePasswordRequest)
     fun verifyEmail(email: String, code: String)
+    fun checkNickname(nickname: String) : NicknameCheckResponse
+
 }

@@ -14,6 +14,9 @@ class BookReviewLog(
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id : Long? = null,
 
+    @Column(name = "user_id")
+    val userId: Long,
+
     @Column(name = "book_read_log_id")
     var bookReadLogId : Long,
 

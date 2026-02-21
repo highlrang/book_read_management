@@ -12,8 +12,9 @@ class BookReviewSaveRequest(
     @Schema(description = "내용", example = "흥미진진하네요")
     var content: String,
 ) {
-    fun toEntity() : BookReviewLog {
+    fun toEntity(userId: Long) : BookReviewLog {
         return BookReviewLog(
+            userId = userId,
             bookReadLogId = bookReadLogId,
             readPage = readPage,
             content = content

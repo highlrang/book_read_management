@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
 import io.swagger.v3.oas.models.servers.Server
 import org.springdoc.core.models.GroupedOpenApi
+import org.springframework.core.io.ClassPathResource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
@@ -26,10 +27,16 @@ class SwaggerConfig() {
     fun openAPI(): OpenAPI {
 
         // API 메타 정보
+        val infoDescription = ClassPathResource("swagger/description.md")
+            .inputStream
+            .bufferedReader()
+            .use { it.readText() }
+
         val info: Info = Info()
             .title("Book Record API")
             .version("1.0.0")
             .termsOfService("")
+            .description(infoDescription)
             .contact(Contact().name("JHHW").url(""))
         val apiKeyScheme: SecurityScheme = SecurityScheme()
             .name("API-Key")
