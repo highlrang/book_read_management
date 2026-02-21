@@ -59,7 +59,7 @@ class BookReadLogServiceImpl(
 
         val pageable = PageRequest.of(request.page - 1, request.size, sort)
         val page = bookReadLogRepository.findByUserIdAndSearchParam(userId, request, pageable)
-        return PageResponse(request.page, request.size, page.totalPages, page.totalElements, page.content)
+        return PageResponse(request.page, request.size, page.totalPages, page.content)
     }
 
     override fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse {

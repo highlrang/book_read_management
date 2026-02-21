@@ -18,7 +18,7 @@ class BookReadLogSearchRequest(
     val readStatus: BookReadStatus,
     @Schema(description = "검색 시작일", example = "2026-01-01")
     val startDate: LocalDate? = null,
-    @Schema(description = "검색 종료일", example = "2026-01-31")
+    @Schema(description = "검색 종료일", example = "2026-12-31")
     val endDate: LocalDate? = null,
     @Schema(description = "페이지", example = "1")
     val page: Int,

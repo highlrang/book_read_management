@@ -5,7 +5,6 @@ class PageResponse<T>(
     var size: Int,
 
     var totalPage: Int,
-    var totalElements: Long,
 
     var content: T,
 

@@ -43,7 +43,8 @@ class BookReadLog (
                 bookIsbn = bookReadLogSaveRequest.bookSbn,
                 bookTitle = bookReadLogSaveRequest.bookTitle,
                 bookAuthor = bookReadLogSaveRequest.bookAuthor,
-                bookThumbnailImage = bookReadLogSaveRequest.bookThumbnailImage
+                bookThumbnailImage = bookReadLogSaveRequest.bookThumbnailImage,
+                totalPage = bookReadLogSaveRequest.bookTotalPage
             )
         }
     }
