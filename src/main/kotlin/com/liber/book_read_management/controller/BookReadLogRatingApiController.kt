@@ -19,16 +19,20 @@ class BookReadLogRatingApiController(
 ) {
 
     @Operation(summary = "도서 평점 저장", description = "도서 평점과 리뷰를 저장합니다.")
-    @PostMapping("rating")
-    fun saveRating(@CurrentUserId userId: Long, @Valid @RequestBody ratingSaveRequest: BookRatingSaveRequest) : ResponseEntity<ApiResponse<Unit>> {
-        bookReadLogService.saveBookRating(userId, ratingSaveRequest)
+    @PostMapping("/rating/{bookReadLogId}")
+    fun saveRating(@CurrentUserId userId: Long,
+                   @PathVariable bookReadLogId: Long,
+                   @Valid @RequestBody ratingSaveRequest: BookRatingSaveRequest) : ResponseEntity<ApiResponse<Unit>> {
+        bookReadLogService.saveBookRating(userId, bookReadLogId, ratingSaveRequest)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
     @Operation(summary = "도서 평점 수정", description = "도서 평점과 리뷰를 수정합니다.")
-    @PatchMapping("rating")
-    fun updateRating(@CurrentUserId userId: Long, ratingUpdateRequest: BookRatingUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
-        bookReadLogService.updateBookRating(userId, ratingUpdateRequest)
+    @PatchMapping("rating/{bookReadLogId}")
+    fun updateRating(@CurrentUserId userId: Long,
+                     @PathVariable bookReadLogId: Long,
+                     @Valid @RequestBody ratingUpdateRequest: BookRatingUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
+        bookReadLogService.updateBookRating(userId, bookReadLogId, ratingUpdateRequest)
         return ResponseEntity.ok(ApiResponse.success())
     }
 
