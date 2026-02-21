@@ -4,9 +4,10 @@ class PageResponse<T>(
     var page: Int,
     var size: Int,
 
-    var totalPage: Int?,
+    var totalPage: Int,
+    var totalElements: Long,
 
-    var contents: T,
+    var content: T,
 
 ) {
 

@@ -38,11 +38,9 @@ class BookReadLogApiController (
     @Operation(summary = "도서 읽기 기록 목록 조회", description = "도서 읽기 기록 목록을 조회합니다.")
     @GetMapping
     fun getBookReadLogs(@CurrentUserId userId: Long,
-                        readLogSearchRequest: BookReadLogSearchRequest,
-                        pageable: Pageable
-    ) : ResponseEntity<ApiResponse<List<BookReadLogResponse>>> {
-        val pageRequest = PageRequest.of(pageable.pageNumber, pageable.pageSize, pageable.sort)
-        val bookReadLogResponseList = bookReadLogService.searchBookReadLogs(userId, readLogSearchRequest, pageRequest)
+                        request: BookReadLogSearchRequest
+    ) : ResponseEntity<ApiResponse<PageResponse<List<BookReadLogResponse>>>> {
+        val bookReadLogResponseList = bookReadLogService.searchBookReadLogs(userId, request)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponseList))
     }
 

@@ -11,6 +11,7 @@ import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReadProgressRepository
 import com.liber.book_read_management.repository.BookReviewLogRepository
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import kotlin.math.roundToInt
@@ -47,10 +48,18 @@ class BookReadLogServiceImpl(
 
     override fun searchBookReadLogs(
         userId: Long,
-        readLogSearchRequest: BookReadLogSearchRequest,
-        pageRequest: PageRequest
-    ): List<BookReadLogResponse> {
-        return bookReadLogRepository.findByUserIdAndSearchParam(userId, readLogSearchRequest, pageRequest)
+        request: BookReadLogSearchRequest
+    ): PageResponse<List<BookReadLogResponse>> {
+        val sortDirection = if (request.sortDirection == SortDirection.asc) {
+            Sort.Direction.ASC
+        } else {
+            Sort.Direction.DESC
+        }
+        val sort = Sort.by(sortDirection, request.sort.name)
+
+        val pageable = PageRequest.of(request.page - 1, request.size, sort)
+        val page = bookReadLogRepository.findByUserIdAndSearchParam(userId, request, pageable)
+        return PageResponse(request.page, request.size, page.totalPages, page.totalElements, page.content)
     }
 
     override fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse {
@@ -69,18 +78,18 @@ class BookReadLogServiceImpl(
     }
 
     @Transactional
-    override fun updatePage(userId: Long, bookReadPageUpdateRequest: BookReadPageUpdateRequest) {
-        val type = bookReadPageUpdateRequest.type
-        val bookReadLogId = bookReadPageUpdateRequest.bookReadLogId
+    override fun updatePage(userId: Long, readPageUpdateRequest: BookReadPageUpdateRequest) {
+        val type = readPageUpdateRequest.type
+        val bookReadLogId = readPageUpdateRequest.bookReadLogId
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId)!!
 
         if (type == BookPageType.TOTAL) {
-            bookReadLog.totalPage = bookReadPageUpdateRequest.page
+            bookReadLog.totalPage = readPageUpdateRequest.page
 
         } else {
             bookReadProgressRepository.save(
-                BookReadProgress.of(userId, bookReadLogId, bookReadPageUpdateRequest.page)
+                BookReadProgress.of(userId, bookReadLogId, readPageUpdateRequest.page)
             )
         }
 
