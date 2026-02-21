@@ -29,9 +29,11 @@ class BookReadLogApiController (
      * TODO 페이지 갱신 모달창!!
      */
     @Operation(summary = "도서 페이지 업데이트", description = "도서 전체 페이지(TOTAL) 또는 읽은 페이지(READ)를 업데이트합니다.")
-    @PatchMapping("/page")
-    fun updatePage(@CurrentUserId userId: Long, @Valid @RequestBody readPageUpdateRequest: BookReadPageUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
-        bookReadLogService.updatePage(userId, readPageUpdateRequest)
+    @PatchMapping("/page/{bookReadLogId}")
+    fun updatePage(@CurrentUserId userId: Long,
+                   @PathVariable bookReadLogId: Long,
+                   @Valid @RequestBody readPageUpdateRequest: BookReadPageUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
+        bookReadLogService.updatePage(userId, bookReadLogId, readPageUpdateRequest)
         return ResponseEntity.ok(ApiResponse.success())
     }
 

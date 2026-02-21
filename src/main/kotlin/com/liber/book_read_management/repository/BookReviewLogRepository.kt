@@ -9,6 +9,6 @@ import org.springframework.data.repository.query.Param
 
 interface BookReviewLogRepository : JpaRepository<BookReviewLog, Long> {
 
-    fun findAllByUserIdAndBookReadLogId(userId: Long, bookReadLogId: Long) : List<BookReviewLog>
+    fun findAllByUserIdAndBookReadLogIdOrderByIdDesc(userId: Long, bookReadLogId: Long) : List<BookReviewLog>
 
 }

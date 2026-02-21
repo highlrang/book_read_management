@@ -6,8 +6,6 @@ import jakarta.validation.constraints.Min
 
 @Schema(description = "도서 페이지 업데이트 요청")
 class BookReadPageUpdateRequest (
-    @Schema(description = "도서 읽기 기록 ID", example = "1")
-    var bookReadLogId: Long,
     @Schema(description = "페이지 타입", example = "TOTAL")
     var type: BookPageType,
     @Schema(description = "페이지", example = "100")

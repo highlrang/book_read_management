@@ -78,9 +78,8 @@ class BookReadLogServiceImpl(
     }
 
     @Transactional
-    override fun updatePage(userId: Long, readPageUpdateRequest: BookReadPageUpdateRequest) {
+    override fun updatePage(userId: Long, bookReadLogId: Long, readPageUpdateRequest: BookReadPageUpdateRequest) {
         val type = readPageUpdateRequest.type
-        val bookReadLogId = readPageUpdateRequest.bookReadLogId
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId)!!
 
@@ -91,7 +90,7 @@ class BookReadLogServiceImpl(
             val lastProgress =
                 bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
 
-            if ((lastProgress?.readPage ?: 0) > readPageUpdateRequest.page) {
+            if ((lastProgress?.readPage ?: 0) >= readPageUpdateRequest.page) {
                 throw ApiException(ExceptionType.VALIDATION_ERROR)
             }
 
@@ -153,7 +152,7 @@ class BookReadLogServiceImpl(
     }
 
     override fun getBookReviewLogs(userId: Long, bookReadLogId: Long): List<BookReviewLogResponse> {
-        val reviews = bookReviewLogRepository.findAllByUserIdAndBookReadLogId(userId, bookReadLogId)
+        val reviews = bookReviewLogRepository.findAllByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
         return reviews.stream()
             .map{ review -> BookReviewLogResponse(review.readPage, review.content, review.createdAt!!.toLocalDate()) }
             .toList()
@@ -164,16 +163,16 @@ class BookReadLogServiceImpl(
 
         val bookReadPageHistoryList = mutableListOf<BookReadPageResponse>()
 
-        var prevPage = 0
-        for (bookReadProgress in readProgressList) {
-            val currentPage = bookReadProgress.readPage
-            val diffPage : Int = currentPage - prevPage
+        for ((index) in readProgressList.withIndex()) {
+            val current = readProgressList.get(index)
+            val prevPage = if (index == readProgressList.size - 1) 0
+                           else readProgressList.get(index + 1).readPage
+
+            val diffPage : Int = current.readPage - prevPage
 
             bookReadPageHistoryList.add(
-                BookReadPageResponse(prevPage, currentPage, diffPage, bookReadProgress.createdAt!!.toLocalDate())
+                BookReadPageResponse(prevPage, current.readPage, diffPage, current.createdAt!!.toLocalDate())
             )
-
-            prevPage = currentPage
         }
 
         return bookReadPageHistoryList
