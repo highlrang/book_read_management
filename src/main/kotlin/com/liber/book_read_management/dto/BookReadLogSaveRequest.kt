@@ -12,4 +12,6 @@ class BookReadLogSaveRequest (
     var bookAuthor: String,
     @Schema(description = "도서 썸네일 이미지", example = "https://image.aladin.co.kr/product/3020/9/cover/8960777331_1.jpg")
     var bookThumbnailImage: String,
+    @Schema(description = "도서 전체 페이지", example = "312")
+    val bookTotalPage: Int?
 )

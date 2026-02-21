@@ -14,22 +14,26 @@ import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.PathBuilder
 import com.querydsl.jpa.impl.JPAQueryFactory
+import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
+import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
+import java.util.function.LongSupplier
 
 @Repository
 class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : BookReadLogQueryRepository {
     override fun findByUserIdAndSearchParam(
         userId: Long,
         readLogSearchRequest: BookReadLogSearchRequest,
-        pageRequest: PageRequest
-    ): List<BookReadLogResponse> {
+        pageable: Pageable
+    ): Page<BookReadLogResponse> {
 
-        val orders = getOrderSpecifiers(pageRequest.sort, BookReadLog::class.java, "bookReadLog")
+        val orders = getOrderSpecifiers(pageable.sort, BookReadLog::class.java, "bookReadLog")
 
-        return jpaQueryFactory.select(
+        val content = jpaQueryFactory.select(
             QBookReadLogResponse(
                 bookReadLog.id,
                 bookReadLog.bookIsbn,
@@ -50,10 +54,19 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
                 betweenDate(readLogSearchRequest.startDate, readLogSearchRequest.endDate)
             )
             .orderBy(*orders)
-            .offset(pageRequest.offset)
-            .limit(pageRequest.pageSize.toLong())
+            .offset(pageable.offset)
+            .limit(pageable.pageSize.toLong())
             .fetch()
 
+        val countQuery = jpaQueryFactory.select(bookReadLog.id.count())
+            .from(bookReadLog)
+            .where(
+                bookReadLog.userId.eq(userId),
+                eqReadStatus(readLogSearchRequest.readStatus),
+                betweenDate(readLogSearchRequest.startDate, readLogSearchRequest.endDate)
+            )
+
+        return PageableExecutionUtils.getPage(content, pageable) { countQuery.fetchOne() ?: 0L }
     }
 
     fun eqReadStatus(readStatus: BookReadStatus?) : BooleanExpression? {

@@ -18,6 +18,22 @@ class BookReadLogSearchRequest(
     val readStatus: BookReadStatus,
     @Schema(description = "검색 시작일", example = "2026-01-01")
     val startDate: LocalDate? = null,
-    @Schema(description = "검색 종료일", example = "2026-01-31")
-    val endDate: LocalDate? = null
+    @Schema(description = "검색 종료일", example = "2026-12-31")
+    val endDate: LocalDate? = null,
+    @Schema(description = "페이지", example = "1")
+    val page: Int,
+    @Schema(description = "페이지 사이즈", example = "20")
+    val size: Int,
+    @Schema(description = "정렬", example = "createdAt")
+    val sort: SortType,
+    @Schema(description = "정렬 방향", example = "desc")
+    val sortDirection: SortDirection
 )
+
+enum class SortType {
+    createdAt
+}
+
+enum class SortDirection {
+    asc, desc
+}
