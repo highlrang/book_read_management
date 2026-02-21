@@ -45,11 +45,20 @@ class BookReadLogApiController (
     }
 
     @Operation(summary = "도서 읽기 기록 상세 조회", description = "도서 읽기 기록 상세 정보를 조회합니다.")
-    @GetMapping("/{id}")
-    fun getBookReadLogs(@CurrentUserId userId: Long,
-                        bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogResponse>> {
+    @GetMapping("/{bookReadLogId}")
+    fun getBookReadLog(@CurrentUserId userId: Long,
+                       @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogResponse>> {
         val bookReadLogResponse = bookReadLogService.getBookReadLog(userId, bookReadLogId)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponse))
+    }
+
+    @Operation(summary = "도서 읽기 기록 히스토리 조회")
+    @GetMapping("/page/{bookReadLogId}")
+    fun getBookReadPageHistory(@CurrentUserId userId: Long,
+                               @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<List<BookReadPageResponse>>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(bookReadLogService.getReadPageHistory(userId, bookReadLogId))
+        )
     }
 
 }

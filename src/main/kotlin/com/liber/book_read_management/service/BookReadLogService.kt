@@ -12,4 +12,6 @@ interface BookReadLogService {
     fun saveBookReview(userId: Long, reviewSaveRequest: BookReviewSaveRequest)
     fun saveBookRating(userId: Long, ratingSaveRequest: BookRatingSaveRequest)
     fun updateBookRating(userId: Long, ratingUpdateRequest: BookRatingUpdateRequest)
+    fun getBookReviewLogs(userId: Long, bookReadLogId: Long): List<BookReviewLogResponse>
+    fun getReadPageHistory(userId: Long, bookReadLogId: Long): List<BookReadPageResponse>
 }
