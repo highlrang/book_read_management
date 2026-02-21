@@ -88,6 +88,13 @@ class BookReadLogServiceImpl(
             bookReadLog.totalPage = readPageUpdateRequest.page
 
         } else {
+            val lastProgress =
+                bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
+
+            if ((lastProgress?.readPage ?: 0) > readPageUpdateRequest.page) {
+                throw ApiException(ExceptionType.VALIDATION_ERROR)
+            }
+
             bookReadProgressRepository.save(
                 BookReadProgress.of(userId, bookReadLogId, readPageUpdateRequest.page)
             )
@@ -112,7 +119,7 @@ class BookReadLogServiceImpl(
         bookReadLogRepository.findByUserIdAndId(userId, reviewSaveRequest.bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        bookReviewLogRepository.save(reviewSaveRequest.toEntity())
+        bookReviewLogRepository.save(reviewSaveRequest.toEntity(userId))
     }
 
     @Transactional
@@ -143,6 +150,33 @@ class BookReadLogServiceImpl(
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         bookRatingLog.update(ratingUpdateRequest.rating, ratingUpdateRequest.content)
+    }
+
+    override fun getBookReviewLogs(userId: Long, bookReadLogId: Long): List<BookReviewLogResponse> {
+        val reviews = bookReviewLogRepository.findAllByUserIdAndBookReadLogId(userId, bookReadLogId)
+        return reviews.stream()
+            .map{ review -> BookReviewLogResponse(review.readPage, review.content, review.createdAt!!.toLocalDate()) }
+            .toList()
+    }
+
+    override fun getReadPageHistory(userId: Long, bookReadLogId: Long): List<BookReadPageResponse> {
+        val readProgressList = bookReadProgressRepository.findAllByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
+
+        val bookReadPageHistoryList = mutableListOf<BookReadPageResponse>()
+
+        var prevPage = 0
+        for (bookReadProgress in readProgressList) {
+            val currentPage = bookReadProgress.readPage
+            val diffPage : Int = currentPage - prevPage
+
+            bookReadPageHistoryList.add(
+                BookReadPageResponse(prevPage, currentPage, diffPage, bookReadProgress.createdAt!!.toLocalDate())
+            )
+
+            prevPage = currentPage
+        }
+
+        return bookReadPageHistoryList
     }
 
 }
