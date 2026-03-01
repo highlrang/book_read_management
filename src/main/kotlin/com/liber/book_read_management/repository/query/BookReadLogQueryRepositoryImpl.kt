@@ -5,6 +5,7 @@ import com.liber.book_read_management.dto.BookReadLogSearchRequest
 import com.liber.book_read_management.dto.QBookReadLogResponse
 import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.QBookReadLog.bookReadLog
+import com.liber.book_read_management.entities.QBookReadProgress.bookReadProgress
 import com.liber.book_read_management.enums.BookReadStatus
 import com.querydsl.core.BooleanBuilder
 import com.querydsl.core.types.Expression
@@ -13,6 +14,7 @@ import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.PathBuilder
+import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -41,6 +43,9 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
                 bookReadLog.bookAuthor,
                 bookReadLog.bookThumbnailImage,
                 bookReadLog.totalPage,
+                JPAExpressions.select(bookReadProgress.readPage.max())
+                    .from(bookReadProgress)
+                    .where(bookReadProgress.bookReadLogId.eq(bookReadLog.id)),
                 bookReadLog.readStatus,
                 bookReadLog.progressPercentage,
                 bookReadLog.createdAt,

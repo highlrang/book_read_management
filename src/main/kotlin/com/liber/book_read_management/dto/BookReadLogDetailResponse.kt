@@ -11,7 +11,7 @@ import java.time.LocalDateTime
  * 목록용
  */
 @Schema(description = "도서 읽기 기록 응답")
-open class BookReadLogResponse @QueryProjection constructor(
+open class BookReadLogDetailResponse (
     @Schema(description = "ID", example = "1")
     var id: Long,
     @Schema(description = "도서 ISBN", example = "9788960777330")
@@ -30,25 +30,30 @@ open class BookReadLogResponse @QueryProjection constructor(
     var readStatus: BookReadStatus,
     @Schema(description = "진행률", example = "16")
     var progressPercentage: Int,
+    @Schema(description = "리뷰 목록")
+    var reviews: List<BookReviewLogResponse>?,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "생성일", example = "2026-01-01 12:00:00")
     var createdAt: LocalDateTime,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     @Schema(description = "수정일", example = "2026-01-01 12:00:00")
     var updatedAt: LocalDateTime
+
 ) {
+
     companion object {
-        fun from(bookReadLog: BookReadLog) : BookReadLogResponse {
-            return BookReadLogResponse(
+        fun from(bookReadLog: BookReadLog) : BookReadLogDetailResponse {
+            return BookReadLogDetailResponse(
                 id = bookReadLog.id!!,
                 bookIsbn = bookReadLog.bookIsbn,
                 bookTitle = bookReadLog.bookTitle,
                 bookAuthor = bookReadLog.bookAuthor,
                 bookThumbnailImage = bookReadLog.bookThumbnailImage,
                 totalPage = bookReadLog.totalPage,
-                readPage = 0,
+                readPage = null,
                 readStatus = bookReadLog.readStatus,
                 progressPercentage = bookReadLog.progressPercentage,
+                reviews = null,
                 createdAt = bookReadLog.createdAt!!,
                 updatedAt = bookReadLog.updatedAt!!
             )

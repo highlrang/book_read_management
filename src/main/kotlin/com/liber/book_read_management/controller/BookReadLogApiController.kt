@@ -6,6 +6,7 @@ import com.liber.book_read_management.service.BookReadLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -38,7 +39,7 @@ class BookReadLogApiController (
     @Operation(summary = "도서 읽기 기록 목록 조회", description = "도서 읽기 기록 목록을 조회합니다.")
     @GetMapping
     fun getBookReadLogs(@CurrentUserId userId: Long,
-                        request: BookReadLogSearchRequest
+                        @ParameterObject request: BookReadLogSearchRequest
     ) : ResponseEntity<ApiResponse<PageResponse<List<BookReadLogResponse>>>> {
         val bookReadLogResponseList = bookReadLogService.searchBookReadLogs(userId, request)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponseList))
@@ -47,9 +48,9 @@ class BookReadLogApiController (
     @Operation(summary = "도서 읽기 기록 상세 조회", description = "도서 읽기 기록 상세 정보를 조회합니다.")
     @GetMapping("/{bookReadLogId}")
     fun getBookReadLog(@CurrentUserId userId: Long,
-                       @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogResponse>> {
-        val bookReadLogResponse = bookReadLogService.getBookReadLog(userId, bookReadLogId)
-        return ResponseEntity.ok(ApiResponse.success(bookReadLogResponse))
+                       @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogDetailResponse>> {
+        val response = bookReadLogService.getBookReadLog(userId, bookReadLogId)
+        return ResponseEntity.ok(ApiResponse.success(response))
     }
 
     @Operation(summary = "도서 읽기 기록 히스토리 조회")
