@@ -31,12 +31,4 @@ class BookReadLogReviewApiController(
         bookReadLogService.saveBookReview(userId, bookReadLogId, reviewSaveRequest)
         return ResponseEntity.ok(ApiResponse.success())
     }
-
-    @Operation(summary = "도서 리뷰 조회")
-    @GetMapping("/reviews/{bookReadLogId}")
-    fun getReviews(@CurrentUserId userId: Long, @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<List<BookReviewLogResponse>>> {
-        return ResponseEntity.ok(
-            ApiResponse.success(bookReadLogService.getBookReviewLogs(userId, bookReadLogId))
-        )
-    }
 }

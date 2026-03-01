@@ -4,6 +4,7 @@ import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.service.BookService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
@@ -17,7 +18,7 @@ class BookApiController(
     @Operation(summary = "도서 검색", description = "(알라딘 API) 검색어로 도서을 검색합니다. 검색어가 없을 경우 베스트셀러를 조회합니다. 페이지당 사이즈는 100으로 고정입니다.")
     @GetMapping
     fun searchBook(
-        bookSearchRequest: BookSearchRequest
+        @ParameterObject bookSearchRequest: BookSearchRequest
     ) : ResponseEntity<ApiResponse<PageResponse<List<BookSearchResponse>>>> {
         val bookPageResponse = bookService.searchBook(bookSearchRequest)
         return ResponseEntity.ok(ApiResponse.success(bookPageResponse))

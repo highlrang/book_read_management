@@ -62,19 +62,21 @@ class BookReadLogServiceImpl(
         return PageResponse(request.page, request.size, page.totalPages, page.content)
     }
 
-    override fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse {
+    override fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogDetailResponse {
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, readLogId)
             ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        val bookReadLogResponse = BookReadLogResponse.from(bookReadLog)
+        val detailResponse = BookReadLogDetailResponse.from(bookReadLog)
 
         val bookReadProgress = bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, readLogId)
-        val readPage = bookReadProgress?.readPage
+        val readPage = bookReadProgress?.readPage?:0
 
-        bookReadLogResponse.readPage = readPage
-        bookReadLogResponse.progressPercentage = calculateProgressInt(bookReadLog.totalPage, readPage)
+        detailResponse.readPage = readPage
+        detailResponse.progressPercentage = calculateProgressInt(bookReadLog.totalPage, readPage)
 
-        return bookReadLogResponse
+        detailResponse.reviews = this.getBookReviewLogs(userId, readLogId)
+
+        return detailResponse
     }
 
     @Transactional

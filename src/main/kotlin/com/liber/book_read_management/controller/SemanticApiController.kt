@@ -12,12 +12,15 @@ import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReviewLogRepository
 import com.liber.book_read_management.service.BookService
 import com.liber.book_read_management.service.SemanticService
+import io.swagger.v3.oas.annotations.Hidden
 import lombok.RequiredArgsConstructor
+import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Profile("local")
 @RestController
 @RequestMapping("/api/v1/semantic")
 @RequiredArgsConstructor

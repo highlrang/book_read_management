@@ -8,9 +8,11 @@ import com.liber.book_read_management.service.BookReadLogService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import org.springframework.context.annotation.Profile
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Profile("local")
 @Tag(name = "도서 평점 API", description = "완독 후 도서 평점 관련 API")
 @RestController
 @RequestMapping("/api/v1/book-read")

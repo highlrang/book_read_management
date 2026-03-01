@@ -7,7 +7,7 @@ interface BookReadLogService {
 
     fun saveBookReadLog(userId: Long, readLogSaveRequest: BookReadLogSaveRequest) : BookReadLogResponse
     fun searchBookReadLogs(userId: Long, request: BookReadLogSearchRequest) : PageResponse<List<BookReadLogResponse>>
-    fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogResponse
+    fun getBookReadLog(userId: Long, readLogId: Long) : BookReadLogDetailResponse
     fun updatePage(userId: Long, bookReadLogId: Long, readPageUpdateRequest: BookReadPageUpdateRequest)
     fun saveBookReview(userId: Long, bookReadLogId: Long, reviewSaveRequest: BookReviewSaveRequest)
     fun saveBookRating(userId: Long, bookReadLogId: Long, ratingSaveRequest: BookRatingSaveRequest)
