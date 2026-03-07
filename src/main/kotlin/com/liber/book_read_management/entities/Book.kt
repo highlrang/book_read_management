@@ -20,6 +20,8 @@ class Book (
     var title: String = "",
     var description: String? = "",
     var author: String = "",
+    @Column(name = "cover")
+    var cover: String? = null,
     var publisher: String = "",
     @Column(name = "published_date")
     var publishedDate: String = "",

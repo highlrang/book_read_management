@@ -46,19 +46,15 @@ class BookReadLogServiceImpl(
         if (existBookReadLog != null)
             throw ApiException(ExceptionType.ALREADY_EXIST)
 
-        val book = getOrCreateBook(readLogSaveRequest)
+        val book = getOrCreateBook(readLogSaveRequest.bookSbn)
 
-        val bookReadLog = BookReadLog.of(userId, readLogSaveRequest)
-        bookReadLog.totalPage = book.totalPage ?: readLogSaveRequest.bookTotalPage
-        bookReadLog.categoryPath = book.categoryPath
-        bookReadLog.categoryGroup = book.categoryGroup
+        val bookReadLog = BookReadLog.of(userId, book)
         val savedBookReadLog = bookReadLogRepository.save(bookReadLog)
 
         return BookReadLogResponse.from(savedBookReadLog)
     }
 
-    private fun getOrCreateBook(readLogSaveRequest: BookReadLogSaveRequest): com.liber.book_read_management.entities.Book {
-        val isbn = readLogSaveRequest.bookSbn
+    private fun getOrCreateBook(isbn: String): com.liber.book_read_management.entities.Book {
         val exist = bookRepository.findByIsbn(isbn)
         if (exist != null) {
             return exist
@@ -70,12 +66,13 @@ class BookReadLogServiceImpl(
 
         val book = com.liber.book_read_management.entities.Book(
             isbn = isbn,
-            title = detail.title ?: readLogSaveRequest.bookTitle,
+            title = detail.title ?: "",
             description = detail.description,
-            author = detail.author ?: readLogSaveRequest.bookAuthor,
+            author = detail.author ?: "",
+            cover = detail.cover,
             publisher = detail.publisher ?: "",
             publishedDate = detail.pubDate ?: "",
-            totalPage = detail.itemPage ?: readLogSaveRequest.bookTotalPage,
+            totalPage = detail.itemPage,
             categoryPath = categoryPath,
             categoryGroup = categoryGroup
         )

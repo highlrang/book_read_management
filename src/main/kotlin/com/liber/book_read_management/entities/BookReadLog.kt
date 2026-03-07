@@ -1,6 +1,6 @@
 package com.liber.book_read_management.entities
 
-import com.liber.book_read_management.dto.BookReadLogSaveRequest
+import com.liber.book_read_management.entities.Book
 import com.liber.book_read_management.enums.CategoryGroup
 import com.liber.book_read_management.enums.BookReadStatus
 import jakarta.persistence.Column
@@ -46,14 +46,16 @@ class BookReadLog (
 ) : BaseTimeEntity() {
 
     companion object {
-        fun of(userId: Long, bookReadLogSaveRequest: BookReadLogSaveRequest) : BookReadLog {
+        fun of(userId: Long, book: Book) : BookReadLog {
             return BookReadLog(
                 userId = userId,
-                bookIsbn = bookReadLogSaveRequest.bookSbn,
-                bookTitle = bookReadLogSaveRequest.bookTitle,
-                bookAuthor = bookReadLogSaveRequest.bookAuthor,
-                bookThumbnailImage = bookReadLogSaveRequest.bookThumbnailImage,
-                totalPage = bookReadLogSaveRequest.bookTotalPage
+                bookIsbn = book.isbn,
+                bookTitle = book.title,
+                bookAuthor = book.author,
+                bookThumbnailImage = book.cover ?: "",
+                totalPage = book.totalPage,
+                categoryPath = book.categoryPath,
+                categoryGroup = book.categoryGroup
             )
         }
     }

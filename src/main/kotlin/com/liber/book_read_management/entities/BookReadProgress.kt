@@ -1,7 +1,5 @@
 package com.liber.book_read_management.entities
 
-import com.liber.book_read_management.dto.BookReadLogSaveRequest
-import com.liber.book_read_management.dto.BookReadPageUpdateRequest
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
