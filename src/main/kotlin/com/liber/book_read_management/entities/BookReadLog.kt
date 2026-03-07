@@ -1,9 +1,12 @@
 package com.liber.book_read_management.entities
 
 import com.liber.book_read_management.dto.BookReadLogSaveRequest
+import com.liber.book_read_management.enums.CategoryGroup
 import com.liber.book_read_management.enums.BookReadStatus
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -29,10 +32,16 @@ class BookReadLog (
 
     @Column(name = "total_page")
     var totalPage: Int? = null,
+    @Enumerated(EnumType.STRING)
     @Column(name = "read_status")
     var readStatus: BookReadStatus = BookReadStatus.READING,
     @Column(name = "progress_percentage")
     var progressPercentage: Int = 0,
+    @Column(name = "category_path")
+    var categoryPath: String? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_group")
+    var categoryGroup: CategoryGroup? = null,
 
 ) : BaseTimeEntity() {
 

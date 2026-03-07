@@ -102,6 +102,22 @@ class UserServiceImpl(
         authRedisStore.setVerifiedEmail(email)
     }
 
+    @Transactional(readOnly = true)
+    override fun getReadingGoal(userId: Long): ReadingGoalResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
+        return ReadingGoalResponse(user.monthlyGoalPages, user.yearlyGoalPages)
+    }
+
+    @Transactional
+    override fun upsertReadingGoal(userId: Long, request: ReadingGoalRequest): ReadingGoalResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
+        user.monthlyGoalPages = request.monthlyGoalPages
+        user.yearlyGoalPages = request.yearlyGoalPages
+        return ReadingGoalResponse(user.monthlyGoalPages, user.yearlyGoalPages)
+    }
+
     fun encryptPassword(password: String) : String {
         return bcryptEncoder.encode(password)
     }

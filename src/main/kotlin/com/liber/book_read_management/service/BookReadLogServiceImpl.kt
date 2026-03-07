@@ -7,10 +7,13 @@ import com.liber.book_read_management.enums.BookPageType
 import com.liber.book_read_management.enums.BookReadStatus
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.repository.BookRepository
 import com.liber.book_read_management.repository.BookRatingLogRepository
 import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReadProgressRepository
 import com.liber.book_read_management.repository.BookReviewLogRepository
+import com.liber.book_read_management.util.CategoryClassifier
+import com.liber.book_read_management.service.BookService
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
@@ -22,7 +25,9 @@ class BookReadLogServiceImpl(
     private var bookReadLogRepository: BookReadLogRepository,
     private var bookReadProgressRepository: BookReadProgressRepository,
     private val bookReviewLogRepository: BookReviewLogRepository,
-    private val bookRatingLogRepository: BookRatingLogRepository
+    private val bookRatingLogRepository: BookRatingLogRepository,
+    private val bookRepository: BookRepository,
+    private val bookService: BookService
 ) : BookReadLogService {
 
     /**
@@ -41,10 +46,41 @@ class BookReadLogServiceImpl(
         if (existBookReadLog != null)
             throw ApiException(ExceptionType.ALREADY_EXIST)
 
+        val book = getOrCreateBook(readLogSaveRequest)
+
         val bookReadLog = BookReadLog.of(userId, readLogSaveRequest)
+        bookReadLog.totalPage = book.totalPage ?: readLogSaveRequest.bookTotalPage
+        bookReadLog.categoryPath = book.categoryPath
+        bookReadLog.categoryGroup = book.categoryGroup
         val savedBookReadLog = bookReadLogRepository.save(bookReadLog)
 
         return BookReadLogResponse.from(savedBookReadLog)
+    }
+
+    private fun getOrCreateBook(readLogSaveRequest: BookReadLogSaveRequest): com.liber.book_read_management.entities.Book {
+        val isbn = readLogSaveRequest.bookSbn
+        val exist = bookRepository.findByIsbn(isbn)
+        if (exist != null) {
+            return exist
+        }
+
+        val detail = bookService.getBookDetail(isbn)
+        val categoryPath = detail.categoryName
+        val categoryGroup = CategoryClassifier.classify(categoryPath)
+
+        val book = com.liber.book_read_management.entities.Book(
+            isbn = isbn,
+            title = detail.title ?: readLogSaveRequest.bookTitle,
+            description = detail.description,
+            author = detail.author ?: readLogSaveRequest.bookAuthor,
+            publisher = detail.publisher ?: "",
+            publishedDate = detail.pubDate ?: "",
+            totalPage = detail.itemPage ?: readLogSaveRequest.bookTotalPage,
+            categoryPath = categoryPath,
+            categoryGroup = categoryGroup
+        )
+
+        return bookRepository.save(book)
     }
 
     override fun searchBookReadLogs(
@@ -98,12 +134,15 @@ class BookReadLogServiceImpl(
                 throw ApiException(ExceptionType.VALIDATION_ERROR)
             }
 
+            val prevReadPage = lastProgress?.readPage ?: 0
+            val diffPage = (page - prevReadPage).coerceAtLeast(0)
+
             bookReadProgressRepository.save(
-                BookReadProgress.of(userId, bookReadLogId, page)
+                BookReadProgress.of(userId, bookReadLogId, page, diffPage)
             )
 
             if (page >= bookReadLog.totalPage!!) {
-                bookReadLog.readStatus = BookReadStatus.COMPLETE
+                bookReadLog.readStatus = BookReadStatus.COMPLETED
             }
         }
 
@@ -179,7 +218,7 @@ class BookReadLogServiceImpl(
             val prevPage = if (index == readProgressList.size - 1) 0
                            else readProgressList.get(index + 1).readPage
 
-            val diffPage : Int = current.readPage - prevPage
+            val diffPage : Int = if (current.readDiff > 0) current.readDiff else current.readPage - prevPage
 
             bookReadPageHistoryList.add(
                 BookReadPageResponse(prevPage, current.readPage, diffPage, current.createdAt!!.toLocalDate())

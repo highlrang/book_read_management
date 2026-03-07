@@ -27,15 +27,18 @@ class BookReadProgress (
 
     @Column(name = "read_page")
     var readPage: Int,
+    @Column(name = "read_diff")
+    var readDiff: Int,
 
 ) : BaseTimeEntity() {
 
     companion object {
-        fun of(userId: Long, bookReadLogId: Long, readPage: Int): BookReadProgress {
+        fun of(userId: Long, bookReadLogId: Long, readPage: Int, readDiff: Int): BookReadProgress {
             return BookReadProgress(
                 userId = userId,
                 bookReadLogId = bookReadLogId,
-                readPage = readPage
+                readPage = readPage,
+                readDiff = readDiff
             )
         }
     }

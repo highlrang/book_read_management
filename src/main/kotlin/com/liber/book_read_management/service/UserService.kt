@@ -11,5 +11,7 @@ interface UserService {
     fun updatePassword(request: UpdatePasswordRequest)
     fun verifyEmail(email: String, code: String)
     fun checkNickname(nickname: String) : NicknameCheckResponse
+    fun getReadingGoal(userId: Long): ReadingGoalResponse
+    fun upsertReadingGoal(userId: Long, request: ReadingGoalRequest): ReadingGoalResponse
 
 }
