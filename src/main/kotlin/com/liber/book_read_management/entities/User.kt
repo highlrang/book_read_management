@@ -27,5 +27,9 @@ class User (
     @Column(name = "access_token")
     var accessToken: String? = null,
     @Column(name = "refresh_token")
-    var refreshToken: String? = null
+    var refreshToken: String? = null,
+    @Column(name = "monthly_goal_pages")
+    var monthlyGoalPages: Int? = null,
+    @Column(name = "yearly_goal_pages")
+    var yearlyGoalPages: Int? = null
 ) : BaseTimeEntity()

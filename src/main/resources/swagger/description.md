@@ -2,7 +2,7 @@
 
 | Enum | Values |
 | --- | --- |
-| BookReadStatus | ALL, READING, COMPLETE |
+| BookReadStatus | ALL, READING, COMPLETED |
 | BookPageType | TOTAL, READ |
 | GenderType | F, M |
 | SortType | createdAt |

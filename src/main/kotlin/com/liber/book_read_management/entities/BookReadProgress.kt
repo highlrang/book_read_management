@@ -1,7 +1,5 @@
 package com.liber.book_read_management.entities
 
-import com.liber.book_read_management.dto.BookReadLogSaveRequest
-import com.liber.book_read_management.dto.BookReadPageUpdateRequest
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -27,15 +25,18 @@ class BookReadProgress (
 
     @Column(name = "read_page")
     var readPage: Int,
+    @Column(name = "read_diff")
+    var readDiff: Int,
 
 ) : BaseTimeEntity() {
 
     companion object {
-        fun of(userId: Long, bookReadLogId: Long, readPage: Int): BookReadProgress {
+        fun of(userId: Long, bookReadLogId: Long, readPage: Int, readDiff: Int): BookReadProgress {
             return BookReadProgress(
                 userId = userId,
                 bookReadLogId = bookReadLogId,
-                readPage = readPage
+                readPage = readPage,
+                readDiff = readDiff
             )
         }
     }
