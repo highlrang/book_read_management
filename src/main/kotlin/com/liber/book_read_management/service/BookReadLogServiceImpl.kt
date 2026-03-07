@@ -4,6 +4,7 @@ import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.BookReadProgress
 import com.liber.book_read_management.enums.BookPageType
+import com.liber.book_read_management.enums.BookReadStatus
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import com.liber.book_read_management.repository.BookRatingLogRepository
@@ -82,23 +83,28 @@ class BookReadLogServiceImpl(
     @Transactional
     override fun updatePage(userId: Long, bookReadLogId: Long, readPageUpdateRequest: BookReadPageUpdateRequest) {
         val type = readPageUpdateRequest.type
+        val page = readPageUpdateRequest.page
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId)!!
 
         if (type == BookPageType.TOTAL) {
-            bookReadLog.totalPage = readPageUpdateRequest.page
+            bookReadLog.totalPage = page
 
         } else {
             val lastProgress =
                 bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
 
-            if ((lastProgress?.readPage ?: 0) >= readPageUpdateRequest.page) {
+            if ((lastProgress?.readPage ?: 0) >= page) {
                 throw ApiException(ExceptionType.VALIDATION_ERROR)
             }
 
             bookReadProgressRepository.save(
-                BookReadProgress.of(userId, bookReadLogId, readPageUpdateRequest.page)
+                BookReadProgress.of(userId, bookReadLogId, page)
             )
+
+            if (page >= bookReadLog.totalPage!!) {
+                bookReadLog.readStatus = BookReadStatus.COMPLETE
+            }
         }
 
     }
