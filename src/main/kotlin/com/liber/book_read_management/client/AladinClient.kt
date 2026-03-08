@@ -13,11 +13,12 @@ interface AladinClient {
     @GetMapping("/ttb/api/ItemSearch.aspx")
     fun searchItem(
         @RequestParam("Query") query: String?,
-        @RequestParam("QueryType") queryType: String = "Title",
+        @RequestParam("QueryType") queryType: String = "Keyword",
+        @RequestParam("CategoryId", required = false) categoryId: Int? = null,
         @RequestParam("Start") start: Int,
         @Max(100) @RequestParam("MaxResults") maxResult: Int,
         @RequestParam("SearchTarget") searchTarget: String = "Book",
-//        @RequestParam("Sort") sort: String? = "PublishTime",
+        @RequestParam("Sort") sort: String = "Accuracy",
         @RequestParam("Version") version: String = "20131101",
         @RequestParam("Output") output: String = "JS"
     ) : AladinBookSearchResponse
@@ -25,6 +26,7 @@ interface AladinClient {
     @GetMapping("/ttb/api/ItemList.aspx")
     fun getItemList(
         @RequestParam("QueryType") queryType: String = "BestSeller", // ItemNewSpecial
+        @RequestParam("CategoryId", required = false) categoryId: Int? = null,
         @RequestParam("SearchTarget") searchTarget: String = "Book",
         @RequestParam("Start") start: Int,
         @Max(100) @RequestParam("MaxResults") maxResult: Int,
@@ -32,14 +34,11 @@ interface AladinClient {
         @RequestParam("Output") output: String = "JS"
     ) : AladinBookSearchResponse
 
-    // TODO CategoryId
-
     @GetMapping("/ttb/api/ItemLookUp.aspx")
     fun getItem(
         @RequestParam("itemIdType") itemIdType: String = "ISBN",
         @RequestParam("ItemId") itemItem: String,
         @RequestParam("Version") version: String = "20131101",
-        @RequestParam("Output") output: String = "JS",
-        @RequestParam("OptResult") optResult: String = "ebookList,usedList,reviewList"
+        @RequestParam("Output") output: String = "JS"
     ) : AladinBookDetailResponse
 }
