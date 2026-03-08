@@ -18,6 +18,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
 import kotlin.math.roundToInt
 
 @Service
@@ -119,6 +120,8 @@ class BookReadLogServiceImpl(
         val page = readPageUpdateRequest.page
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId)!!
+        bookReadLog.updatedAt = LocalDateTime.now()
+
         val lastProgress =
             bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
 
@@ -213,8 +216,7 @@ class BookReadLogServiceImpl(
             val current = readProgressList.get(index)
             val prevPage = if (index == readProgressList.size - 1) 0
                            else readProgressList.get(index + 1).readPage
-
-            val diffPage : Int = if (current.readDiff > 0) current.readDiff else current.readPage - prevPage
+            val diffPage: Int = current.readDiff
 
             bookReadPageHistoryList.add(
                 BookReadPageResponse(prevPage, current.readPage, diffPage, current.createdAt!!.toLocalDate())

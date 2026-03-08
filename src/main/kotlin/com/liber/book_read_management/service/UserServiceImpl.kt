@@ -73,6 +73,7 @@ class UserServiceImpl(
         user.accessToken = null
     }
 
+    @Transactional
     override fun refreshToken(refreshToken: String): AuthResponse {
         val decodedJWT = tokenUtil.verifyToken(refreshToken)
         val userId = decodedJWT.subject.toLong()

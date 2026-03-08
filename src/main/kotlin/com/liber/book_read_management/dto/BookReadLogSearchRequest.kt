@@ -14,7 +14,7 @@ import org.springframework.data.domain.Sort.Direction;
 @Setter
 @NoArgsConstructor
 class BookReadLogSearchRequest(
-    @Schema(description = "검색어", example = "해리포터")
+    @Schema(description = "검색어(도서명, 저자)", example = "해리포터")
     val searchValue: String?,
     @field:Schema(description = "읽기 상태", example = "ALL", defaultValue = "ALL")
     val readStatus: BookReadStatus = BookReadStatus.ALL,
@@ -33,7 +33,9 @@ class BookReadLogSearchRequest(
 )
 
 enum class SortType {
-    createdAt
+    createdAt,
+    progressPercentage,
+    bookTitle
 }
 
 enum class SortDirection {

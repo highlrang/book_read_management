@@ -3,27 +3,22 @@ package com.liber.book_read_management.repository.query
 import com.liber.book_read_management.dto.BookReadLogResponse
 import com.liber.book_read_management.dto.BookReadLogSearchRequest
 import com.liber.book_read_management.dto.QBookReadLogResponse
-import com.liber.book_read_management.entities.BookReadLog
 import com.liber.book_read_management.entities.QBookReadLog.bookReadLog
 import com.liber.book_read_management.entities.QBookReadProgress.bookReadProgress
 import com.liber.book_read_management.enums.BookReadStatus
 import com.querydsl.core.BooleanBuilder
-import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Order
 import com.querydsl.core.types.OrderSpecifier
 import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.BooleanExpression
-import com.querydsl.core.types.dsl.PathBuilder
 import com.querydsl.jpa.JPAExpressions
 import com.querydsl.jpa.impl.JPAQueryFactory
 import org.springframework.data.domain.Page
-import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
 import org.springframework.data.support.PageableExecutionUtils
 import org.springframework.stereotype.Repository
 import java.time.LocalDate
-import java.util.function.LongSupplier
 
 @Repository
 class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : BookReadLogQueryRepository {
@@ -33,7 +28,7 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
         pageable: Pageable
     ): Page<BookReadLogResponse> {
 
-        val orders = getOrderSpecifiers(pageable.sort, BookReadLog::class.java, "bookReadLog")
+        val orders = getOrderSpecifiers(pageable.sort)
 
         val content = jpaQueryFactory.select(
             QBookReadLogResponse(
@@ -105,13 +100,15 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
         return builder.value
     }
 
-    private fun getOrderSpecifiers(sort: Sort, entityClass: Class<*>, entityName: String): Array<OrderSpecifier<*>> {
-        val pathBuilder = PathBuilder(entityClass, entityName)
-
+    private fun getOrderSpecifiers(sort: Sort): Array<OrderSpecifier<*>> {
         return sort.map { order ->
             val direction = if (order.isAscending) Order.ASC else Order.DESC
-            val prop = order.property
-            OrderSpecifier(direction, pathBuilder.get(prop) as Expression<out Comparable<*>>)
+            when (order.property) {
+                "createdAt" -> OrderSpecifier(direction, bookReadLog.createdAt)
+                "progressPercentage" -> OrderSpecifier(direction, bookReadLog.progressPercentage)
+                "bookTitle" -> OrderSpecifier(direction, bookReadLog.bookTitle)
+                else -> OrderSpecifier(Order.DESC, bookReadLog.createdAt)
+            }
         }.toList().toTypedArray()
     }
 }
