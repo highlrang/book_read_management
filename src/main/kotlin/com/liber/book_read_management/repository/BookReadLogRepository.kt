@@ -9,6 +9,7 @@ interface BookReadLogRepository : JpaRepository<BookReadLog, Long>, BookReadLogQ
 
     fun findByUserIdAndBookIsbn(userId: Long, bookIsbn: String): BookReadLog?
     fun findByUserIdAndId(userId: Long, id: Long): BookReadLog?
+    fun findTopByUserIdOrderByCreatedAtAsc(userId: Long): BookReadLog?
     fun countByUserIdAndReadStatus(userId: Long, readStatus: BookReadStatus): Long
     fun findAllByUserIdAndCategoryGroupNotNull(userId: Long): List<BookReadLog>
 }

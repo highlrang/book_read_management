@@ -8,7 +8,12 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springdoc.core.annotations.ParameterObject
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "도서 읽기 기록 API", description = "도서 읽기 기록 관련 API")
 @RestController
@@ -22,18 +27,6 @@ class BookReadLogApiController (
     fun saveReadLog(@CurrentUserId userId: Long, @Valid @RequestBody readLogSaveRequest: BookReadLogSaveRequest) : ResponseEntity<ApiResponse<BookReadLogResponse>> {
         val bookReadLogResponse = bookReadLogService.saveBookReadLog(userId, readLogSaveRequest)
         return ResponseEntity.ok(ApiResponse.success(bookReadLogResponse))
-    }
-
-    /**
-     * TODO 페이지 갱신 모달창!!
-     */
-    @Operation(summary = "도서 페이지 업데이트", description = "도서 전체 페이지(TOTAL) 또는 읽은 페이지(READ)를 업데이트합니다.")
-    @PatchMapping("/page/{bookReadLogId}")
-    fun updatePage(@CurrentUserId userId: Long,
-                   @PathVariable bookReadLogId: Long,
-                   @Valid @RequestBody readPageUpdateRequest: BookReadPageUpdateRequest) : ResponseEntity<ApiResponse<Unit>> {
-        bookReadLogService.updatePage(userId, bookReadLogId, readPageUpdateRequest)
-        return ResponseEntity.ok(ApiResponse.success())
     }
 
     @Operation(summary = "도서 읽기 기록 목록 조회", description = "도서 읽기 기록 목록을 조회합니다.")
@@ -51,15 +44,6 @@ class BookReadLogApiController (
                        @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<BookReadLogDetailResponse>> {
         val response = bookReadLogService.getBookReadLog(userId, bookReadLogId)
         return ResponseEntity.ok(ApiResponse.success(response))
-    }
-
-    @Operation(summary = "도서 읽기 기록 히스토리 조회")
-    @GetMapping("/page/{bookReadLogId}")
-    fun getBookReadPageHistory(@CurrentUserId userId: Long,
-                               @PathVariable bookReadLogId: Long) : ResponseEntity<ApiResponse<List<BookReadPageResponse>>> {
-        return ResponseEntity.ok(
-            ApiResponse.success(bookReadLogService.getReadPageHistory(userId, bookReadLogId))
-        )
     }
 
 }

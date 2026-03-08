@@ -1,6 +1,8 @@
 package com.liber.book_read_management.dto
 
 import com.liber.book_read_management.dto.aladin.AladinBookSearchResponse
+import com.liber.book_read_management.util.CategoryClassifier
+import com.liber.book_read_management.util.CategoryLabel
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "도서 검색 응답")
@@ -19,6 +21,8 @@ class BookSearchResponse(
     var publisher: String?,
     @Schema(description = "출판일", example = "2017-09-01")
     var pubDate: String?,
+    @Schema(description = "카테고리", example = "기술/IT")
+    var category: String,
     @Schema(description = "링크", example = "http://www.aladin.co.kr/shop/wproduct.aspx?ItemId=116520102&amp;partner=openAPI&amp;start=api")
     var link: String?,
 
@@ -34,6 +38,7 @@ class BookSearchResponse(
                 aladinItem.description,
                 aladinItem.publisher,
                 aladinItem.pubDate,
+                CategoryLabel.toKorean(CategoryClassifier.classify(aladinItem.categoryName)),
                 aladinItem.link
             )
         }

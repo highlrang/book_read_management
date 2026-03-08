@@ -88,6 +88,7 @@ class AuthFilter(
             || requestUri.startsWith("/auth/verify-email")
             || requestUri.startsWith("/email_verified.html")
             || requestUri.startsWith("/error.html")
+            || requestUri.startsWith("/app/uploads")
             || requestUri == "/"
     }
 
@@ -98,6 +99,7 @@ class AuthFilter(
                 || requestUri.startsWith("/api/v1/auth/refresh")
                 || requestUri.startsWith("/api/v1/auth/send-verification-email")
                 || requestUri.startsWith("/api/v1/files")
+                || requestUri.startsWith("/app/uploads")
                 || requestUri.startsWith("/api/v1/auth/password")
     }
 }

@@ -31,7 +31,7 @@ class SemanticApiController(
     private val bookService: BookService
 ) {
 
-    @PostMapping("/recommend")
+    @PostMapping("/recommend/{bookReadLogId}")
     fun generateSemanticScore(
         @CurrentUserId userId: Long,
         @RequestBody request: SemanticSearchRequest

@@ -11,5 +11,7 @@ class LoginRequest (
     var email: String,
     @Password
     @Schema(description = "비밀번호", example = "password1234!")
-    var password: String
+    var password: String,
+    @Schema(description = "FCM 토큰", example = "d7Ck...token")
+    var fcmToken: String? = null
 )

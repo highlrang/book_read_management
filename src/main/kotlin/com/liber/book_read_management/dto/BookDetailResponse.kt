@@ -1,6 +1,8 @@
 package com.liber.book_read_management.dto
 
 import com.liber.book_read_management.dto.aladin.AladinBookDetailResponse
+import com.liber.book_read_management.util.CategoryClassifier
+import com.liber.book_read_management.util.CategoryLabel
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "도서 상세 응답")
@@ -25,6 +27,8 @@ class BookDetailResponse (
     val categoryId: Int?,
     @Schema(description = "카테고리명", example = "국내도서>컴퓨터/모바일>프로그래밍 언어>자바")
     val categoryName: String?,
+    @Schema(description = "카테고리", example = "기술/IT")
+    val category: String,
     @Schema(description = "출판사", example = "에이콘출판")
     val publisher: String?,
     @Schema(description = "페이지 수", example = "600")
@@ -48,6 +52,7 @@ class BookDetailResponse (
                 isbn = item?.isbn,
                 categoryId = item?.categoryId,
                 categoryName = item?.categoryName,
+                category = CategoryLabel.toKorean(CategoryClassifier.classify(item?.categoryName)),
                 publisher = item?.publisher,
                 itemPage = subInfo?.itemPage
             )
