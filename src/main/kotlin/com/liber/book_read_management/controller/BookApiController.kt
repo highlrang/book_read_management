@@ -28,7 +28,7 @@ class BookApiController(
         return ResponseEntity.ok(ApiResponse.success(bookPageResponse))
     }
 
-    @Operation(summary = "도서 카테고리 목록 조회", description = "클라이언트에서 사용할 도서 카테고리 목록을 조회합니다.")
+    @Operation(summary = "도서 카테고리 목록 조회", description = "도서 카테고리 목록을 조회합니다. (서버 임의 카테고리)")
     @GetMapping("/category")
     fun getBookCategories() : ResponseEntity<ApiResponse<List<BookCategoryResponse>>> {
         return ResponseEntity.ok(ApiResponse.success(bookService.getBookCategories()))

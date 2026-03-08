@@ -43,3 +43,6 @@ client:
 apiKey: ${API_KEY}
 
 secretKey: ${SECRET_KEY}
+
+fcm:
+  server-key: ${FCM_SERVER_KEY:}

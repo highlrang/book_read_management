@@ -2,6 +2,7 @@ package com.liber.book_read_management.entities
 
 import com.liber.book_read_management.enums.GenderType
 import jakarta.persistence.*
+import java.time.LocalTime
 
 @Entity
 @Table(name = "USER")
@@ -31,5 +32,11 @@ class User (
     @Column(name = "monthly_goal_pages")
     var monthlyGoalPages: Int? = null,
     @Column(name = "yearly_goal_pages")
-    var yearlyGoalPages: Int? = null
+    var yearlyGoalPages: Int? = null,
+    @Column(name = "notification_enabled")
+    var notificationEnabled: Boolean = false,
+    @Column(name = "notification_time")
+    var notificationTime: LocalTime? = null,
+    @Column(name = "fcm_token", length = 1000)
+    var fcmToken: String? = null
 ) : BaseTimeEntity()

@@ -13,5 +13,7 @@ interface UserService {
     fun checkNickname(nickname: String) : NicknameCheckResponse
     fun getReadingGoal(userId: Long): ReadingGoalResponse
     fun upsertReadingGoal(userId: Long, request: ReadingGoalRequest): ReadingGoalResponse
+    fun getProfile(userId: Long): UserProfileResponse
+    fun upsertNotificationSetting(userId: Long, request: NotificationSettingUpsertRequest): NotificationSettingResponse
 
 }

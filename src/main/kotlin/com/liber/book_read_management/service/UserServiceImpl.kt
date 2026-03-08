@@ -5,18 +5,24 @@ import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.UserRepository
 import com.liber.book_read_management.repository.redis.AuthRedisStore
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 @Service
 class UserServiceImpl(
     private var userRepository: UserRepository,
+    private val bookReadLogRepository: BookReadLogRepository,
+    private val fileService: FileService,
     private var bcryptEncoder: BCryptPasswordEncoder,
     private var tokenUtil: TokenUtil,
-    private var authRedisStore: AuthRedisStore
+    private var authRedisStore: AuthRedisStore,
+    private val pushNotificationService: PushNotificationService
 ) : UserService {
 
     override fun checkNickname(nickname: String): NicknameCheckResponse {
@@ -61,6 +67,9 @@ class UserServiceImpl(
 
         user.accessToken = accessToken
         user.refreshToken = refreshToken
+        if (!request.fcmToken.isNullOrBlank()) {
+            user.fcmToken = request.fcmToken
+        }
 
         return AuthResponse(userId, accessToken, refreshToken)
     }
@@ -117,6 +126,58 @@ class UserServiceImpl(
         user.monthlyGoalPages = request.monthlyGoalPages
         user.yearlyGoalPages = request.yearlyGoalPages
         return ReadingGoalResponse(user.monthlyGoalPages, user.yearlyGoalPages)
+    }
+
+    @Transactional(readOnly = true)
+    override fun getProfile(userId: Long): UserProfileResponse {
+        val user = userRepository.findById(userId)
+            .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
+
+        val firstReadLog = bookReadLogRepository.findTopByUserIdOrderByCreatedAtAsc(userId)
+        val readingDays = if (firstReadLog?.createdAt != null) {
+            ChronoUnit.DAYS.between(firstReadLog.createdAt!!.toLocalDate(), LocalDate.now()) + 1
+        } else {
+            0L
+        }
+
+        return UserProfileResponse(
+            nickname = user.nickname,
+            photoUrl = fileService.getFileUrl(user.photoId),
+            readingDays = readingDays,
+            notificationEnabled = user.notificationEnabled,
+            notificationTime = user.notificationTime,
+            hasFcmToken = !user.fcmToken.isNullOrBlank()
+        )
+    }
+
+    @Transactional
+    override fun upsertNotificationSetting(
+        userId: Long,
+        request: NotificationSettingUpsertRequest
+    ): NotificationSettingResponse {
+        if (request.enabled && request.time == null) {
+            throw ApiException(ExceptionType.VALIDATION_ERROR)
+        }
+
+        val user = userRepository.findById(userId)
+            .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
+
+        user.notificationEnabled = request.enabled
+        user.notificationTime = if (request.enabled) request.time else null
+
+        if (user.notificationEnabled && !user.fcmToken.isNullOrBlank()) {
+            pushNotificationService.sendNotification(
+                user.fcmToken!!,
+                "독서 알림 설정 완료",
+                "매일 ${user.notificationTime}에 독서 알림을 보내드릴게요."
+            )
+        }
+
+        return NotificationSettingResponse(
+            enabled = user.notificationEnabled,
+            time = user.notificationTime,
+            hasFcmToken = !user.fcmToken.isNullOrBlank()
+        )
     }
 
     fun encryptPassword(password: String) : String {
