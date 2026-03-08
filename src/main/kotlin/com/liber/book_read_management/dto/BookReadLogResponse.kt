@@ -23,9 +23,9 @@ open class BookReadLogResponse @QueryProjection constructor(
     @Schema(description = "도서 썸네일 이미지", example = "https://image.aladin.co.kr/product/3020/9/cover/8960777331_1.jpg")
     var bookThumbnailImage: String,
     @Schema(description = "전체 페이지", example = "600")
-    var totalPage: Int?,
+    var totalPage: Int,
     @Schema(description = "읽은 페이지", example = "100")
-    var readPage: Int?,
+    var readPage: Int,
     @Schema(description = "읽기 상태", example = "READING")
     var readStatus: BookReadStatus,
     @Schema(description = "진행률", example = "16")

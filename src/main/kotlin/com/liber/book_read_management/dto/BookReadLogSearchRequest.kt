@@ -16,7 +16,7 @@ import org.springframework.data.domain.Sort.Direction;
 class BookReadLogSearchRequest(
     @Schema(description = "검색어", example = "해리포터")
     val searchValue: String?,
-    @Schema(description = "읽기 상태", example = "ALL")
+    @field:Schema(description = "읽기 상태", example = "ALL", defaultValue = "ALL")
     val readStatus: BookReadStatus = BookReadStatus.ALL,
     @Schema(description = "검색 시작일", example = "2026-01-01")
     val startDate: LocalDate? = null,
@@ -26,9 +26,9 @@ class BookReadLogSearchRequest(
     val page: Int = 1,
     @Schema(description = "페이지 사이즈", example = "20")
     val size: Int = 20,
-    @Schema(description = "정렬", example = "createdAt")
+    @field:Schema(description = "정렬", example = "createdAt", defaultValue = "createdAt")
     val sort: SortType = SortType.createdAt,
-    @Schema(description = "정렬 방향", example = "desc")
+    @field:Schema(description = "정렬 방향", example = "desc", defaultValue = "desc")
     val sortDirection: SortDirection = SortDirection.desc
 )
 

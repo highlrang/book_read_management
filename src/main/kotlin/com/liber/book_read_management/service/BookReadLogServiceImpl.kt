@@ -119,14 +119,15 @@ class BookReadLogServiceImpl(
         val page = readPageUpdateRequest.page
 
         val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId)!!
+        val lastProgress =
+            bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
 
         if (type == BookPageType.TOTAL) {
             bookReadLog.totalPage = page
+            val currentReadPage = lastProgress?.readPage ?: 0
+            bookReadLog.progressPercentage = calculateProgressInt(bookReadLog.totalPage, currentReadPage)
 
         } else {
-            val lastProgress =
-                bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
-
             if ((lastProgress?.readPage ?: 0) >= page) {
                 throw ApiException(ExceptionType.VALIDATION_ERROR)
             }
@@ -137,21 +138,19 @@ class BookReadLogServiceImpl(
             bookReadProgressRepository.save(
                 BookReadProgress.of(userId, bookReadLogId, page, diffPage)
             )
+            bookReadLog.progressPercentage = calculateProgressInt(bookReadLog.totalPage, page)
 
-            if (page >= bookReadLog.totalPage!!) {
+            if (page >= bookReadLog.totalPage) {
                 bookReadLog.readStatus = BookReadStatus.COMPLETED
             }
         }
 
     }
 
-    fun calculateProgressInt(totalPage: Int?, readPage: Int?): Int {
-        val total = totalPage ?: 0
-        val read = readPage ?: 0
+    fun calculateProgressInt(totalPage: Int, readPage: Int): Int {
+        if (totalPage <= 0) return 0
 
-        if (total <= 0) return 0
-
-        return ((read.toDouble() / total.toDouble()) * 100.0).roundToInt().coerceAtMost(100)
+        return ((readPage.toDouble() / totalPage.toDouble()) * 100.0).roundToInt().coerceAtMost(100)
     }
 
     @Transactional

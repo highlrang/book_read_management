@@ -31,7 +31,7 @@ class BookReadLog (
     var bookThumbnailImage: String,
 
     @Column(name = "total_page")
-    var totalPage: Int? = null,
+    var totalPage: Int = 0,
     @Enumerated(EnumType.STRING)
     @Column(name = "read_status")
     var readStatus: BookReadStatus = BookReadStatus.READING,
@@ -53,7 +53,7 @@ class BookReadLog (
                 bookTitle = book.title,
                 bookAuthor = book.author,
                 bookThumbnailImage = book.cover ?: "",
-                totalPage = book.totalPage,
+                totalPage = book.totalPage ?: 0,
                 categoryPath = book.categoryPath,
                 categoryGroup = book.categoryGroup
             )

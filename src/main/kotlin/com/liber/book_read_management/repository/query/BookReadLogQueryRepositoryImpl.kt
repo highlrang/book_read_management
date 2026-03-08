@@ -42,8 +42,8 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
                 bookReadLog.bookTitle,
                 bookReadLog.bookAuthor,
                 bookReadLog.bookThumbnailImage,
-                bookReadLog.totalPage,
-                JPAExpressions.select(bookReadProgress.readPage.max())
+                bookReadLog.totalPage.coalesce(0),
+                JPAExpressions.select(bookReadProgress.readPage.max().coalesce(0))
                     .from(bookReadProgress)
                     .where(bookReadProgress.bookReadLogId.eq(bookReadLog.id)),
                 bookReadLog.readStatus,
