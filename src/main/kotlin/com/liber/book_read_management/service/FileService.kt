@@ -6,6 +6,9 @@ import org.springframework.web.multipart.MultipartFile
 
 interface FileService {
     fun uploadFile(file: MultipartFile): FileResponseDto
-    fun getFileUrl(fileId: Long?): String?
+    fun getFilePath(fileId: Long?): String?
+    fun getFileUrl(filePath: String?): String?
     fun loadFileResource(fileId: Long): Pair<Resource, String>
+    fun loadFileResourceByPath(filePath: String): Pair<Resource, String>
+    fun loadFileResourceByStoredFileName(fileName: String): Pair<Resource, String>
 }

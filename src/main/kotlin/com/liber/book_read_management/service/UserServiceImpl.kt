@@ -139,10 +139,11 @@ class UserServiceImpl(
         } else {
             0L
         }
+        val photoPath = fileService.getFilePath(user.photoId)
 
         return UserProfileResponse(
             nickname = user.nickname,
-            photoUrl = fileService.getFileUrl(user.photoId),
+            photoUrl = fileService.getFileUrl(photoPath),
             readingDays = readingDays,
             notificationEnabled = user.notificationEnabled,
             notificationTime = user.notificationTime,

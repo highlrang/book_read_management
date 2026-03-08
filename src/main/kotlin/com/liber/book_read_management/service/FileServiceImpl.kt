@@ -51,14 +51,46 @@ class FileServiceImpl(
         return FileResponseDto(savedFile.id!!)
     }
 
-    override fun getFileUrl(fileId: Long?): String? {
+    override fun getFilePath(fileId: Long?): String? {
         if (fileId == null) return null
-        return "$myDomain/api/v1/files/$fileId/content"
+        return fileRepository.findById(fileId)
+            .map { file -> file.filePath }
+            .orElse(null)
+    }
+
+    override fun getFileUrl(filePath: String?): String? {
+        if (filePath.isNullOrBlank()) return null
+        val fileName = Paths.get(filePath).fileName?.toString() ?: return null
+        return "$myDomain/app/uploads/$fileName"
     }
 
     override fun loadFileResource(fileId: Long): Pair<Resource, String> {
         val file = fileRepository.findById(fileId)
             .orElseThrow { ApiException(ExceptionType.DATA_NOT_FOUND) }
+
+        val resource = FileSystemResource(file.filePath)
+        if (!resource.exists()) {
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+        }
+
+        return resource to file.contentType
+    }
+
+    override fun loadFileResourceByPath(filePath: String): Pair<Resource, String> {
+        val file = fileRepository.findByFilePath(filePath)
+            ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
+
+        val resource = FileSystemResource(file.filePath)
+        if (!resource.exists()) {
+            throw ApiException(ExceptionType.DATA_NOT_FOUND)
+        }
+
+        return resource to file.contentType
+    }
+
+    override fun loadFileResourceByStoredFileName(fileName: String): Pair<Resource, String> {
+        val file = fileRepository.findByStoredFileName(fileName)
+            ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         val resource = FileSystemResource(file.filePath)
         if (!resource.exists()) {

@@ -4,4 +4,6 @@ import com.liber.book_read_management.entities.File
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface FileRepository : JpaRepository<File, Long> {
+    fun findByFilePath(filePath: String): File?
+    fun findByStoredFileName(storedFileName: String): File?
 }
