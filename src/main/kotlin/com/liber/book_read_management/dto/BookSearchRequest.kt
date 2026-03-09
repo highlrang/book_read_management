@@ -1,6 +1,6 @@
 package com.liber.book_read_management.dto
 
-import com.liber.book_read_management.enums.CategoryGroup
+import com.liber.book_read_management.enums.BookCategory
 import io.swagger.v3.oas.annotations.Hidden
 import io.swagger.v3.oas.annotations.media.Schema
 
@@ -21,10 +21,10 @@ class BookSearchRequest(
     )
     val sort: BookSortType = BookSortType.Accuracy,
     @field:Schema(
-        description = "카테고리 필터 (searchTarget=Book에서만 적용, eBook/Foreign 미적용)", // TODO 부정확함..
-        example = "TECHNOLOGY"
+        description = "카테고리 필터",
+        example = "IT"
     )
-    val category: CategoryGroup? = null,
+    val category: BookCategory? = null,
     @field:Schema(
         description = "검색 타겟",
         example = "Book",
