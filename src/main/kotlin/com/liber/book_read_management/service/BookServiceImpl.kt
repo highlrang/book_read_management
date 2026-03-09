@@ -6,10 +6,8 @@ import com.liber.book_read_management.dto.BookDetailResponse
 import com.liber.book_read_management.dto.BookSearchRequest
 import com.liber.book_read_management.dto.BookSearchResponse
 import com.liber.book_read_management.dto.PageResponse
-import com.liber.book_read_management.enums.CategoryGroup
-import com.liber.book_read_management.dto.BookSearchTarget
-import com.liber.book_read_management.util.AladinCategoryMapper
-import com.liber.book_read_management.util.CategoryLabel
+import com.liber.book_read_management.enums.BookCategory
+import com.liber.book_read_management.util.BookCategoryCidMapper
 import org.springframework.stereotype.Service
 
 @Service
@@ -18,11 +16,8 @@ class BookServiceImpl(
 ) : BookService {
 
     override fun searchBook(bookSearchRequest: BookSearchRequest): PageResponse<List<BookSearchResponse>> {
-        // TODO Aladin CategoryId는 국내도서(Book) 기준 매핑이라 eBook/Foreign(foriegn) 검색에는 적용하지 않는다.
-        val categoryId = if (bookSearchRequest.searchTarget == BookSearchTarget.Book) {
-            AladinCategoryMapper.getCategoryIdOrNull(bookSearchRequest.category)
-        } else {
-            null
+        val categoryId = bookSearchRequest.category?.let { category ->
+            BookCategoryCidMapper.getCid(bookSearchRequest.searchTarget, category)
         }
 
         val aladinBookSearchResponse =
@@ -56,12 +51,11 @@ class BookServiceImpl(
     }
 
     override fun getBookCategories(): List<BookCategoryResponse> {
-        return CategoryGroup.values()
-            .filter { category -> category != CategoryGroup.UNKNOWN }
+        return BookCategory.values()
             .map { category ->
                 BookCategoryResponse(
                     code = category.name,
-                    label = CategoryLabel.toKorean(category)
+                    label = toBookCategoryLabel(category)
                 )
             }
     }
@@ -71,5 +65,23 @@ class BookServiceImpl(
         return BookDetailResponse.of(aladinBookDetailResponse)
     }
 
+    private fun toBookCategoryLabel(category: BookCategory): String {
+        return when (category) {
+            BookCategory.NOVEL -> "소설"
+            BookCategory.ESSAY -> "에세이"
+            BookCategory.BUSINESS -> "경영/경제"
+            BookCategory.SELF_DEVELOPMENT -> "자기계발"
+            BookCategory.HUMANITIES -> "인문"
+            BookCategory.SOCIETY -> "사회"
+            BookCategory.HISTORY -> "역사"
+            BookCategory.SCIENCE -> "과학"
+            BookCategory.IT -> "기술/IT"
+            BookCategory.ART -> "예술/문화"
+            BookCategory.TRAVEL -> "여행"
+            BookCategory.HOBBY -> "취미"
+            BookCategory.LANGUAGE -> "외국어"
+            BookCategory.COMIC -> "만화"
+        }
+    }
 
 }
