@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component
 class GeminiUsageExtractor {
 
     fun extract(response: Any): GeminiTokenUsage {
-        // Java GenAI javadoc states GenerateContentResponseUsageMetadata is not supported in Gemini API.
-        // This service uses Gemini directly, so token counts are treated as unavailable instead of using reflection.
+        // Gemini API에서는 usage metadata가 안정적으로 제공되지 않을 수 있으므로,
+        // reflection으로 억지 접근하지 않고 토큰 수를 비어 있는 값으로 처리한다.
         return GeminiTokenUsage()
     }
 }

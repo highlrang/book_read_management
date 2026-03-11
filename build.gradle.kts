@@ -46,12 +46,12 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 
-    // QueryDSL
+    // QueryDSL 의존성
     implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-    // QueryDSL APT (Q 클래스 생성)
+    // QueryDSL APT 설정(Q 클래스 생성)
     kapt("com.querydsl:querydsl-apt:5.1.0:jakarta")
 
-    // Jakarta (APT용)
+    // Jakarta APT용 의존성
     kapt("jakarta.annotation:jakarta.annotation-api")
     kapt("jakarta.persistence:jakarta.persistence-api")
 

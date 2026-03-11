@@ -8,7 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDateTime
 
 /**
- * 목록용
+ * 도서 읽기 기록 상세 응답
  */
 @Schema(description = "도서 읽기 기록 응답")
 open class BookReadLogDetailResponse (

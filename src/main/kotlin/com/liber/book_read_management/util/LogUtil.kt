@@ -12,7 +12,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class LogUtil(val objectMapper: ObjectMapper) {
 
-    // REQUEST
+    // 요청 로그
     fun logRequest(request: ContentCachingRequestWrapper) {
         val method = request.method
         val requestUri = request.requestURI
@@ -31,7 +31,7 @@ class LogUtil(val objectMapper: ObjectMapper) {
         log.info("REQUEST {}", entries(logMap))
     }
 
-    // RESPONSE
+    // 응답 로그
     fun logResponse(response: ContentCachingResponseWrapper) {
         val status = response.status
         val headerNames = response.headerNames
@@ -49,7 +49,7 @@ class LogUtil(val objectMapper: ObjectMapper) {
         log.info("RESPONSE {}", entries(logMap))
     }
 
-    // ERROR with Exception
+    // 예외 객체 기반 오류 로그
     fun logError(ex: Exception) {
         val logMap = LinkedHashMap<String, Any?>()
         logMap["type"] = "EXCEPTION"
@@ -58,7 +58,7 @@ class LogUtil(val objectMapper: ObjectMapper) {
         log.error("EXCEPTION {}", entries(logMap), ex)
     }
 
-    // ERROR with Custom message
+    // 사용자 정의 메시지 기반 오류 로그
     fun logError(exceptionType: ExceptionType, customMessage: String?) {
         var message = exceptionType.message
         if (customMessage != null) message += "    $customMessage"

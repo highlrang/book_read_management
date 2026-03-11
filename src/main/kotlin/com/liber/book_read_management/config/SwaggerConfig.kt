@@ -26,7 +26,7 @@ class SwaggerConfig() {
     @Bean
     fun openAPI(): OpenAPI {
 
-        // API 메타 정보
+        // API 메타 정보 설정
         val infoDescription = ClassPathResource("swagger/description.md")
             .inputStream
             .bufferedReader()
@@ -51,7 +51,7 @@ class SwaggerConfig() {
             .bearerFormat("JWT")
             .description("JWT Access Token (Bearer 없이 입력)")
 
-        // 서버 URL: 리버스 프록시/게이트웨이를 타는 경우 "/"가 안전
+        // 서버 URL은 리버스 프록시나 게이트웨이를 통과하는 경우 "/"로 두는 편이 안전하다.
         val server: Server = Server().url("/")
         return OpenAPI()
             .info(info)
