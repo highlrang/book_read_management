@@ -60,6 +60,7 @@ dependencies {
     implementation("com.auth0:java-jwt:4.5.0")
     implementation("org.springframework.security:spring-security-crypto")
     implementation("io.github.microutils:kotlin-logging:3.0.5")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 
     implementation(platform("software.amazon.awssdk:bom:2.27.12"))
     implementation("software.amazon.awssdk:secretsmanager")

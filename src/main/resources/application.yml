@@ -36,6 +36,11 @@ google:
   ai:
     api-key: ${GEMINI_API_KEY}
 
+recommendation:
+  llm:
+    planner-model: gemini-2.5-flash-lite
+    explainer-model: gemini-2.5-flash
+
 client:
   aladin:
     ttbKey: ${ALADIN_KEY}
