@@ -20,29 +20,29 @@ class TokenUtil(@Value("\${secretKey}") private val secretKey: String,
     private val keyBytes: ByteArray = Base64.getDecoder().decode(secretKey)
     private val algorithm = Algorithm.HMAC256(keyBytes)
 
-    // TODO 핸드폰 인증 & OAuth
+    // 추후 휴대폰 인증과 OAuth 인증까지 확장할 수 있도록 분리한다.
     fun createAccessToken(userId: Long): String {
         return JWT.create()
-            .withIssuer("my-app")          // 토큰 발급자(iss)
-            .withSubject(userId.toString())           // 사용자 식별자(sub)
-            .withClaim("role", "USER")     // 커스텀 클레임
-            .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME)) // 만료 시간 (1시간)
+            .withIssuer("my-app")          // 토큰 발급자
+            .withSubject(userId.toString())           // 사용자 식별자
+            .withClaim("role", "USER")     // 추가 권한 정보
+            .withExpiresAt(Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION_TIME)) // 만료 시간
             .sign(algorithm)
     }
 
     fun createRefreshToken(userId: Long): String {
         return JWT.create()
-            .withIssuer("my-app")          // 토큰 발급자(iss)
-            .withSubject(userId.toString())           // 사용자 식별자(sub)
-            .withClaim("role", "USER")     // 커스텀 클레임
-            .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME)) // 만료 시간 (1시간)
+            .withIssuer("my-app")          // 토큰 발급자
+            .withSubject(userId.toString())           // 사용자 식별자
+            .withClaim("role", "USER")     // 추가 권한 정보
+            .withExpiresAt(Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION_TIME)) // 만료 시간
             .sign(algorithm)
     }
 
     fun verifyToken(token: String): DecodedJWT {
         try {
             val verifier = JWT.require(algorithm)
-                .withIssuer("my-app")   // 발급자 확인 (선택)
+                .withIssuer("my-app")   // 발급자 검증
                 .build()
 
             val decodedJWT = verifier.verify(token)

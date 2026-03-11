@@ -25,7 +25,7 @@ interface AladinClient {
 
     @GetMapping("/ttb/api/ItemList.aspx")
     fun getItemList(
-        @RequestParam("QueryType") queryType: String = "BestSeller", // ItemNewSpecial
+        @RequestParam("QueryType") queryType: String = "BestSeller", // 필요하면 ItemNewSpecial 등 다른 목록 타입으로 교체 가능
         @RequestParam("CategoryId", required = false) categoryId: Int? = null,
         @RequestParam("SearchTarget") searchTarget: String = "Book",
         @RequestParam("Start") start: Int,
