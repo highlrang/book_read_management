@@ -10,6 +10,7 @@ import com.liber.book_read_management.dto.semantic.BookInfoRequest
 import com.liber.book_read_management.dto.semantic.RecommendationExplanation
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.service.recommendation.model.ExplainerResult
 import com.liber.book_read_management.service.recommendation.model.RankedRecommendation
 import org.springframework.stereotype.Service
 
@@ -18,15 +19,23 @@ class ExplainerService(
     private val client: Client,
     private val objectMapper: ObjectMapper,
     private val recommendationLlmProperties: RecommendationLlmProperties,
+    private val geminiUsageExtractor: GeminiUsageExtractor,
     private val promptRepository: PromptRepository,
     private val promptTemplateFormatter: PromptTemplateFormatter
 ) {
 
-    fun explain(bookInfoRequest: BookInfoRequest, rankedRecommendations: List<RankedRecommendation>): Map<String, String> {
+    fun explain(bookInfoRequest: BookInfoRequest, rankedRecommendations: List<RankedRecommendation>): ExplainerResult {
         if (rankedRecommendations.isEmpty()) {
-            return emptyMap()
+            return ExplainerResult(
+                model = recommendationLlmProperties.explainerModel,
+                promptTokenCount = 0,
+                responseTokenCount = 0,
+                totalTokenCount = 0,
+                explanationsByIsbn = emptyMap()
+            )
         }
 
+        val model = recommendationLlmProperties.explainerModel
         val prompt = promptTemplateFormatter.format(
             promptRepository.getPrompt(PromptType.BOOK_RECOMMENDATION_EXPLAINER),
             mapOf(
@@ -43,17 +52,25 @@ class ExplainerService(
             .build()
 
         val response = client.models.generateContent(
-            recommendationLlmProperties.explainerModel,
+            model,
             prompt,
             config
         )
+        val rawResponse = response.text() ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
+        val usage = geminiUsageExtractor.extract(response)
 
         val explanations = objectMapper.readValue(
-            response.text() ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR),
+            rawResponse,
             object : TypeReference<List<RecommendationExplanation>>() {}
         )
 
-        return explanations.associate { it.isbn to it.reason }
+        return ExplainerResult(
+            model = model,
+            promptTokenCount = usage.promptTokenCount,
+            responseTokenCount = usage.responseTokenCount,
+            totalTokenCount = usage.totalTokenCount,
+            explanationsByIsbn = explanations.associate { it.isbn to it.reason }
+        )
     }
 
     private fun formatReviews(reviews: List<String>): String {

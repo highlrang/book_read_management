@@ -15,14 +15,28 @@ class FilterService(
             .map { it.bookIsbn.trim() }
             .toSet()
 
-        val filtered = candidates
-            .filter(::hasRequiredMetadata)
-            .distinctBy { normalizedIsbn(it) }
-            .filterNot { normalizedIsbn(it) in readIsbns }
+        val seenIsbns = mutableSetOf<String>()
+        val filtered = mutableListOf<RecommendationCandidate>()
+        var removedCount = 0
+
+        candidates.forEach { candidate ->
+            when {
+                !hasRequiredMetadata(candidate) -> {
+                    removedCount += 1
+                }
+                !seenIsbns.add(normalizedIsbn(candidate)) -> {
+                    removedCount += 1
+                }
+                normalizedIsbn(candidate) in readIsbns -> {
+                    removedCount += 1
+                }
+                else -> filtered += candidate
+            }
+        }
 
         return FilterResult(
             candidates = filtered,
-            removedCount = candidates.size - filtered.size
+            removedCount = removedCount
         )
     }
 

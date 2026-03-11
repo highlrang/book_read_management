@@ -6,9 +6,11 @@ import com.liber.book_read_management.dto.PageResponse
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.entities.RecommendationSourceType
 import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.BookReviewLogRepository
 import com.liber.book_read_management.service.recommendation.RecommendationAgentService
+import com.liber.book_read_management.service.recommendation.model.RecommendationSourceLog
 import lombok.RequiredArgsConstructor
 import org.springframework.context.annotation.Profile
 import org.springframework.web.bind.annotation.PathVariable
@@ -63,7 +65,11 @@ class SemanticApiController(
             reviews = reviews.map { it.content }
         )
 
-        return recommendationAgentService.recommend(userId = userId, request = bookInfoRequest)
+        return recommendationAgentService.recommend(
+            userId = userId,
+            request = bookInfoRequest,
+            sourceLogs = logIds.map { RecommendationSourceLog(it, RecommendationSourceType.RECENT_USER_LOG) }
+        )
     }
 
     @PostMapping("/recommend/{bookReadLogId}")
@@ -84,6 +90,10 @@ class SemanticApiController(
             reviews = reviews.map { it.content }
         )
 
-        return recommendationAgentService.recommend(userId = userId, request = bookInfoRequest)
+        return recommendationAgentService.recommend(
+            userId = userId,
+            request = bookInfoRequest,
+            sourceLogs = listOf(RecommendationSourceLog(bookReadLog.id!!, RecommendationSourceType.TARGET_LOG))
+        )
     }
 }

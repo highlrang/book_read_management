@@ -3,10 +3,12 @@ package com.liber.book_read_management.service.recommendation
 import com.liber.book_read_management.dto.BookSearchResponse
 import com.liber.book_read_management.dto.PageResponse
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
+import com.liber.book_read_management.service.recommendation.model.RecommendationPipelineResult
+import com.liber.book_read_management.service.recommendation.model.RecommendationSourceLog
 import com.liber.book_read_management.service.recommendation.model.RecommendationTrace
 import mu.KotlinLogging
 import net.logstash.logback.argument.StructuredArguments.entries
-import org.springframework.cache.annotation.Cacheable
+import org.springframework.cache.CacheManager
 import org.springframework.stereotype.Service
 import java.util.UUID
 
@@ -18,32 +20,84 @@ private val log = KotlinLogging.logger {}
  */
 @Service
 class RecommendationAgentService(
+    private val cacheManager: CacheManager,
     private val plannerService: PlannerService,
     private val retrieverService: RetrieverService,
     private val filterService: FilterService,
     private val rankerService: RankerService,
-    private val explainerService: ExplainerService
+    private val explainerService: ExplainerService,
+    private val recommendationHistoryService: RecommendationHistoryService
 ) {
-
-    @Cacheable(
-        cacheNames = ["recommendations"],
-        key = "T(com.liber.book_read_management.service.recommendation.RecommendationCacheKeyGenerator).generate(#userId, #request)"
-    )
-    fun recommend(userId: Long, request: BookInfoRequest): PageResponse<List<BookSearchResponse>> {
+    fun recommend(
+        userId: Long,
+        request: BookInfoRequest,
+        sourceLogs: List<RecommendationSourceLog>
+    ): PageResponse<List<BookSearchResponse>> {
         val trace = RecommendationTrace(traceId = UUID.randomUUID().toString())
+        val cacheKey = RecommendationCacheKeyGenerator.generate(userId, request)
+        val recommendationCache = cacheManager.getCache("recommendations")
+        val cachedResult = recommendationCache?.get(cacheKey, RecommendationPipelineResult::class.java)
+
+        val pipelineResult = if (cachedResult != null) {
+            log.info(
+                "recommendation.cache.hit {}",
+                entries(
+                    linkedMapOf(
+                        "traceId" to trace.traceId,
+                        "cacheKey" to cacheKey
+                    )
+                )
+            )
+            cachedResult
+        } else {
+            val computed = runPipeline(trace, userId, request)
+            recommendationCache?.put(cacheKey, computed)
+            computed
+        }
+
+        recommendationHistoryService.save(
+            traceId = trace.traceId,
+            userId = userId,
+            sourceLogs = sourceLogs,
+            cacheHit = cachedResult != null,
+            pipelineResult = pipelineResult
+        )
+
+        val books = pipelineResult.rankedRecommendations.map { ranked ->
+            BookSearchResponse.of(ranked.candidate.item)
+        }
+
+        return PageResponse(
+            page = 0,
+            size = books.size,
+            totalPage = if (books.isEmpty()) 0 else 1,
+            content = books
+        )
+    }
+
+    private fun runPipeline(
+        trace: RecommendationTrace,
+        userId: Long,
+        request: BookInfoRequest
+    ): RecommendationPipelineResult {
         var retryCount = 0
 
-        val primaryQueries = measureLatency(
+        val plannerResult = measureLatency(
             trace = trace,
             stage = "planner",
             latencyField = "plannerLatency",
             action = {
-                plannerService.generateQueryCandidates(request).ifEmpty { listOf(request.title) }
+                plannerService.generateQueryCandidates(request)
             },
-            endFields = { queries ->
-                mapOf("queryCount" to queries.size)
+            endFields = { result ->
+                mapOf(
+                    "queryCount" to result.queries.size,
+                    "promptTokens" to (result.promptTokenCount ?: 0),
+                    "responseTokens" to (result.responseTokenCount ?: 0)
+                )
             }
         )
+        val primaryQueries = plannerResult.queries.ifEmpty { listOf(request.title) }
         trace.plannerQueries = primaryQueries
 
         var activeQueries = primaryQueries
@@ -63,18 +117,23 @@ class RecommendationAgentService(
         if (trace.retrieverResultCount < 3) {
             // 1차 검색 결과가 너무 적으면, 더 넓은 검색어 전략으로 Planner를 한 번만 재시도한다.
             retryCount = 1
-            val retryQueries = measureLatency(
+            val retryPlannerResult = measureLatency(
                 trace = trace,
                 stage = "planner",
                 latencyField = "plannerLatency",
                 attempt = 2,
                 action = {
-                    plannerService.generateRelaxedQueryCandidates(request).ifEmpty { primaryQueries }
+                    plannerService.generateRelaxedQueryCandidates(request)
                 },
-                endFields = { queries ->
-                    mapOf("queryCount" to queries.size)
+                endFields = { result ->
+                    mapOf(
+                        "queryCount" to result.queries.size,
+                        "promptTokens" to (result.promptTokenCount ?: 0),
+                        "responseTokens" to (result.responseTokenCount ?: 0)
+                    )
                 }
             )
+            val retryQueries = retryPlannerResult.queries.ifEmpty { primaryQueries }
             activeQueries = retryQueries
             trace.plannerQueries = retryQueries
 
@@ -122,22 +181,21 @@ class RecommendationAgentService(
         )
         trace.rankedResultCount = rankedRecommendations.size
 
-        val reasonsByIsbn = measureLatency(
+        val explainerResult = measureLatency(
             trace = trace,
             stage = "explainer",
             latencyField = "explainerLatency",
             action = {
                 explainerService.explain(request, rankedRecommendations)
             },
-            endFields = { explanations ->
-                mapOf("resultCount" to explanations.size)
+            endFields = { result ->
+                mapOf(
+                    "resultCount" to result.explanationsByIsbn.size,
+                    "promptTokens" to (result.promptTokenCount ?: 0),
+                    "responseTokens" to (result.responseTokenCount ?: 0)
+                )
             }
         )
-
-        val books = rankedRecommendations.map { ranked ->
-            val item = ranked.candidate.item
-            BookSearchResponse.of(item)
-        }
 
         log.info(
             "recommendation.pipeline.end {}",
@@ -158,11 +216,28 @@ class RecommendationAgentService(
             )
         )
 
-        return PageResponse(
-            page = 0,
-            size = books.size,
-            totalPage = if (books.isEmpty()) 0 else 1,
-            content = books
+        return RecommendationPipelineResult(
+            requestTitle = request.title,
+            plannerQueries = trace.plannerQueries,
+            plannerModel = plannerResult.model,
+            plannerPromptTokenCount = plannerResult.promptTokenCount,
+            plannerResponseTokenCount = plannerResult.responseTokenCount,
+            plannerTotalTokenCount = plannerResult.totalTokenCount,
+            explainerModel = explainerResult.model,
+            explainerPromptTokenCount = explainerResult.promptTokenCount,
+            explainerResponseTokenCount = explainerResult.responseTokenCount,
+            explainerTotalTokenCount = explainerResult.totalTokenCount,
+            retrieverResultCount = trace.retrieverResultCount,
+            filterRemovedCount = trace.filterRemovedCount,
+            rankedResultCount = trace.rankedResultCount,
+            plannerLatency = trace.plannerLatency,
+            retrieverLatency = trace.retrieverLatency,
+            filterLatency = trace.filterLatency,
+            rankerLatency = trace.rankerLatency,
+            explainerLatency = trace.explainerLatency,
+            retryCount = retryCount,
+            rankedRecommendations = rankedRecommendations,
+            explanationsByIsbn = explainerResult.explanationsByIsbn
         )
     }
 

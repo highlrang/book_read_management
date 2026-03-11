@@ -28,7 +28,13 @@ class RankerService {
                 val popularityScore = popularityScore(candidate)
                 val totalScore = keywordScore * 0.5 + publishDateScore * 0.25 + popularityScore * 0.25
 
-                RankedRecommendation(candidate = candidate, score = totalScore)
+                RankedRecommendation(
+                    candidate = candidate,
+                    score = totalScore,
+                    keywordScore = keywordScore,
+                    publishDateScore = publishDateScore,
+                    popularityScore = popularityScore
+                )
             }
             .sortedByDescending { it.score }
             .take(TOP_RANKED_RESULTS)

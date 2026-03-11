@@ -9,6 +9,7 @@ import com.liber.book_read_management.config.RecommendationLlmProperties
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.service.recommendation.model.PlannerResult
 import org.springframework.stereotype.Service
 import kotlin.math.max
 
@@ -17,14 +18,15 @@ class PlannerService(
     private val client: Client,
     private val objectMapper: ObjectMapper,
     private val recommendationLlmProperties: RecommendationLlmProperties,
+    private val geminiUsageExtractor: GeminiUsageExtractor,
     private val promptRepository: PromptRepository,
     private val promptTemplateFormatter: PromptTemplateFormatter
 ) {
-    fun generateQueryCandidates(bookInfoRequest: BookInfoRequest): List<String> {
+    fun generateQueryCandidates(bookInfoRequest: BookInfoRequest): PlannerResult {
         return generate(bookInfoRequest, PlannerStrategy.DEFAULT)
     }
 
-    fun generateRelaxedQueryCandidates(bookInfoRequest: BookInfoRequest): List<String> {
+    fun generateRelaxedQueryCandidates(bookInfoRequest: BookInfoRequest): PlannerResult {
         return generate(bookInfoRequest, PlannerStrategy.RELAXED)
     }
 
@@ -35,7 +37,8 @@ class PlannerService(
             .ifBlank { "- 리뷰 없음" }
     }
 
-    private fun generate(bookInfoRequest: BookInfoRequest, strategy: PlannerStrategy): List<String> {
+    private fun generate(bookInfoRequest: BookInfoRequest, strategy: PlannerStrategy): PlannerResult {
+        val model = recommendationLlmProperties.plannerModel
         val prompt = promptTemplateFormatter.format(
             buildPrompt(strategy),
             mapOf(
@@ -51,17 +54,25 @@ class PlannerService(
             .build()
 
         val response = client.models.generateContent(
-            recommendationLlmProperties.plannerModel,
+            model,
             prompt,
             config
         )
+        val rawResponse = response.text() ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR)
+        val usage = geminiUsageExtractor.extract(response)
 
         val queryCandidates = objectMapper.readValue(
-            response.text() ?: throw ApiException(ExceptionType.INTERNAL_SERVER_ERROR),
+            rawResponse,
             object : TypeReference<List<String>>() {}
         )
 
-        return sanitizeQueries(queryCandidates, bookInfoRequest)
+        return PlannerResult(
+            model = model,
+            promptTokenCount = usage.promptTokenCount,
+            responseTokenCount = usage.responseTokenCount,
+            totalTokenCount = usage.totalTokenCount,
+            queries = sanitizeQueries(queryCandidates, bookInfoRequest)
+        )
     }
 
     private fun buildPrompt(strategy: PlannerStrategy): String {
