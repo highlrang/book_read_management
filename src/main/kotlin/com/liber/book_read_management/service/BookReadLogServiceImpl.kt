@@ -129,6 +129,7 @@ class BookReadLogServiceImpl(
             bookReadLog.totalPage = page
             val currentReadPage = lastProgress?.readPage ?: 0
             bookReadLog.progressPercentage = calculateProgressInt(bookReadLog.totalPage, currentReadPage)
+            updateReadStatus(bookReadLog, currentReadPage)
 
         } else {
             if ((lastProgress?.readPage ?: 0) >= page) {
@@ -142,10 +143,7 @@ class BookReadLogServiceImpl(
                 BookReadProgress.of(userId, bookReadLogId, page, diffPage)
             )
             bookReadLog.progressPercentage = calculateProgressInt(bookReadLog.totalPage, page)
-
-            if (page >= bookReadLog.totalPage) {
-                bookReadLog.readStatus = BookReadStatus.COMPLETED
-            }
+            updateReadStatus(bookReadLog, page)
         }
 
     }
@@ -154,6 +152,14 @@ class BookReadLogServiceImpl(
         if (totalPage <= 0) return 0
 
         return ((readPage.toDouble() / totalPage.toDouble()) * 100.0).roundToInt().coerceAtMost(100)
+    }
+
+    fun updateReadStatus(bookReadLog: BookReadLog, readPage: Int) {
+        bookReadLog.readStatus = if (bookReadLog.totalPage > 0 && readPage >= bookReadLog.totalPage) {
+            BookReadStatus.COMPLETED
+        } else {
+            BookReadStatus.READING
+        }
     }
 
     @Transactional

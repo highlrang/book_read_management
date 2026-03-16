@@ -88,6 +88,7 @@ class StatisticsServiceImpl(
         val yearlyDailyReads = buildDailyReadsWithProgress(dailyTotalsAll)
 
         val streakDays = calculateStreakDays(dailyTotalsAll, now)
+        val expectedStreakDays = calculateExpectedStreakDays(dailyTotalsAll, now)
 
         val totalLast30 = dailyTotalsLast30.values.sum()
         val averageDailyPagesRaw = totalLast30 / 30.0
@@ -142,6 +143,7 @@ class StatisticsServiceImpl(
             ),
             yearlyDailyReads = yearlyDailyReads,
             streakDays = streakDays,
+            expectedStreakDays = expectedStreakDays,
             readingPace = ReadingPaceResponse(
                 averageDailyPages = averageDailyPages,
                 projectedMonthlyPages = projectedMonthlyPages,
@@ -167,6 +169,25 @@ class StatisticsServiceImpl(
     private fun calculateStreakDays(dailyTotals: Map<LocalDate, Int>, today: LocalDate): Int {
         var streak = 0
         var cursor = today
+
+        while (true) {
+            val pages = dailyTotals[cursor] ?: 0
+            if (pages <= 0) break
+            streak += 1
+            cursor = cursor.minusDays(1)
+        }
+
+        return streak
+    }
+
+    private fun calculateExpectedStreakDays(dailyTotals: Map<LocalDate, Int>, today: LocalDate): Int {
+        val todayPages = dailyTotals[today] ?: 0
+        if (todayPages > 0) {
+            return calculateStreakDays(dailyTotals, today)
+        }
+
+        var streak = 1
+        var cursor = today.minusDays(1)
 
         while (true) {
             val pages = dailyTotals[cursor] ?: 0

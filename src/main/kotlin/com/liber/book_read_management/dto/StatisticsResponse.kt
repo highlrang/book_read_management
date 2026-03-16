@@ -28,6 +28,8 @@ data class StatisticsResponse(
     val yearlyDailyReads: List<DailyReadResponse>,
     @Schema(description = "연속 읽기 일수", example = "7")
     val streakDays: Int,
+    @Schema(description = "오늘 읽으면 달성 가능한 연속 읽기 일수", example = "8")
+    val expectedStreakDays: Int,
     @Schema(description = "독서 페이스 지표")
     val readingPace: ReadingPaceResponse
 )
