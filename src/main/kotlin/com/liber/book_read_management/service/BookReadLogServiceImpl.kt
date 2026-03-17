@@ -45,7 +45,7 @@ class BookReadLogServiceImpl(
             readLogSaveRequest.bookSbn
         )
         if (existBookReadLog != null)
-            throw ApiException(ExceptionType.ALREADY_EXIST)
+            throw ApiException(ExceptionType.ALREADY_EXIST, "이미 서재에 저장된 도서입니다.")
 
         val book = getOrCreateBook(readLogSaveRequest.bookSbn)
 

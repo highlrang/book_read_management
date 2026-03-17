@@ -41,11 +41,7 @@ class StatisticsServiceImpl(
 
         val avgStart = now.minusDays(29)
 
-        val progressList = bookReadProgressRepository
-            .findAllByUserIdAndCreatedAtLessThanEqualOrderByBookReadLogIdAscIdAsc(
-                userId,
-                now.atTime(LocalTime.MAX)
-            )
+        val progressList = getProgressListUntil(userId, now)
 
         val prevReadByBook = mutableMapOf<Long, Int>()
         val dailyTotalsAll = mutableMapOf<LocalDate, Int>()
@@ -85,10 +81,7 @@ class StatisticsServiceImpl(
             }
         }
 
-        val yearlyDailyReads = buildDailyReadsWithProgress(dailyTotalsAll)
-
         val streakDays = calculateStreakDays(dailyTotalsAll, now)
-        val expectedStreakDays = calculateExpectedStreakDays(dailyTotalsAll, now)
 
         val totalLast30 = dailyTotalsLast30.values.sum()
         val averageDailyPagesRaw = totalLast30 / 30.0
@@ -141,9 +134,7 @@ class StatisticsServiceImpl(
                 readPages = yearlyPages,
                 achievementRatePercent = yearlyGoalAchievementRatePercent
             ),
-            yearlyDailyReads = yearlyDailyReads,
             streakDays = streakDays,
-            expectedStreakDays = expectedStreakDays,
             readingPace = ReadingPaceResponse(
                 averageDailyPages = averageDailyPages,
                 projectedMonthlyPages = projectedMonthlyPages,
@@ -151,6 +142,37 @@ class StatisticsServiceImpl(
             )
         )
     }
+
+    override fun getYearlyDailyReads(userId: Long, year: Int): List<DailyReadResponse> {
+        val yearStart = LocalDate.of(year, 1, 1)
+        val yearEnd = LocalDate.of(year, 12, 31)
+        val progressList = getProgressListUntil(userId, yearEnd)
+        val prevReadByBook = mutableMapOf<Long, Int>()
+        val dailyTotals = mutableMapOf<LocalDate, Int>()
+
+        for (progress in progressList) {
+            val createdAt = progress.createdAt ?: continue
+            val date = createdAt.toLocalDate()
+            val bookId = progress.bookReadLogId
+
+            val prevReadPage = prevReadByBook[bookId] ?: 0
+            val diffPage = progress.readDiff.takeIf { it > 0 }
+                ?: (progress.readPage - prevReadPage).coerceAtLeast(0)
+            prevReadByBook[bookId] = progress.readPage
+
+            if (diffPage == 0 || date.isBefore(yearStart) || date.isAfter(yearEnd)) continue
+
+            dailyTotals[date] = (dailyTotals[date] ?: 0) + diffPage
+        }
+
+        return buildDailyReadsWithProgress(dailyTotals)
+    }
+
+    private fun getProgressListUntil(userId: Long, date: LocalDate) =
+        bookReadProgressRepository.findAllByUserIdAndCreatedAtLessThanEqualOrderByBookReadLogIdAscIdAsc(
+            userId,
+            date.atTime(LocalTime.MAX)
+        )
 
     private fun buildDailyReadsWithProgress(
         dailyTotals: Map<LocalDate, Int>
@@ -164,39 +186,6 @@ class StatisticsServiceImpl(
                     pages = entry.value
                 )
             }
-    }
-
-    private fun calculateStreakDays(dailyTotals: Map<LocalDate, Int>, today: LocalDate): Int {
-        var streak = 0
-        var cursor = today
-
-        while (true) {
-            val pages = dailyTotals[cursor] ?: 0
-            if (pages <= 0) break
-            streak += 1
-            cursor = cursor.minusDays(1)
-        }
-
-        return streak
-    }
-
-    private fun calculateExpectedStreakDays(dailyTotals: Map<LocalDate, Int>, today: LocalDate): Int {
-        val todayPages = dailyTotals[today] ?: 0
-        if (todayPages > 0) {
-            return calculateStreakDays(dailyTotals, today)
-        }
-
-        var streak = 1
-        var cursor = today.minusDays(1)
-
-        while (true) {
-            val pages = dailyTotals[cursor] ?: 0
-            if (pages <= 0) break
-            streak += 1
-            cursor = cursor.minusDays(1)
-        }
-
-        return streak
     }
 
     private fun buildCategoryTop3(userId: Long): List<CategoryRatioResponse> {
@@ -223,4 +212,19 @@ class StatisticsServiceImpl(
                 CategoryRatioResponse(CategoryLabel.toKorean(entry.key), entry.value, percent)
             }
     }
+}
+
+internal fun calculateStreakDays(dailyTotals: Map<LocalDate, Int>, today: LocalDate): Int {
+    val startDate = if ((dailyTotals[today] ?: 0) > 0) today else today.minusDays(1)
+    var streak = 0
+    var cursor = startDate
+
+    while (true) {
+        val pages = dailyTotals[cursor] ?: 0
+        if (pages <= 0) break
+        streak += 1
+        cursor = cursor.minusDays(1)
+    }
+
+    return streak
 }
