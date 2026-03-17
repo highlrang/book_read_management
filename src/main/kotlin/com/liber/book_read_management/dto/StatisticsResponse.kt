@@ -24,8 +24,6 @@ data class StatisticsResponse(
     val monthlyGoal: GoalProgressResponse,
     @Schema(description = "연간 목표 달성 정보")
     val yearlyGoal: GoalProgressResponse,
-    @Schema(description = "연간 일별 읽은 페이지 목록(잔디용)")
-    val yearlyDailyReads: List<DailyReadResponse>,
     @Schema(description = "연속 읽기 일수", example = "7")
     val streakDays: Int,
     @Schema(description = "독서 페이스 지표")

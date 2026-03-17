@@ -21,6 +21,10 @@ class AuthFilter(
     private var tokenUtil: TokenUtil
 ) : OncePerRequestFilter() {
 
+    companion object {
+        private const val BEARER_PREFIX = "Bearer "
+    }
+
     @Value("\${apiKey}")
     private lateinit var API_KEY: String
 
@@ -54,21 +58,22 @@ class AuthFilter(
         }
 
         // 토큰 인증
-        var token = request.getHeader("Authorization")
-        if (token == null) {
+        val authorizationHeader = request.getHeader("Authorization")
+        if (authorizationHeader.isNullOrBlank()) {
             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid token")
             return
         }
 
         try {
-            token = token.substring("Bearer ".length)
+            val token = extractBearerToken(authorizationHeader)
             val decodedJwt = tokenUtil.verifyToken(token)
 
             val userId: Long = tokenUtil.getUserId(decodedJwt)
 
             val user: User = userRepository.findById(userId)
                 .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
-            tokenUtil.matchToken(token, user.accessToken!!) // TODO !!랑 requireNotNull 응답 차이 확인
+            val accessToken = user.accessToken ?: throw ApiException(ExceptionType.INVALID_AUTH)
+            tokenUtil.matchToken(token, accessToken)
 
             RequestContextHolder.currentRequestAttributes()
                 .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)
@@ -101,5 +106,18 @@ class AuthFilter(
                 || requestUri.startsWith("/api/v1/files")
                 || requestUri.startsWith("/app/uploads")
                 || requestUri.startsWith("/api/v1/auth/password")
+    }
+
+    fun extractBearerToken(authorizationHeader: String): String {
+        if (!authorizationHeader.startsWith(BEARER_PREFIX)) {
+            throw ApiException(ExceptionType.INVALID_AUTH)
+        }
+
+        val token = authorizationHeader.removePrefix(BEARER_PREFIX).trim()
+        if (token.isBlank()) {
+            throw ApiException(ExceptionType.INVALID_AUTH)
+        }
+
+        return token
     }
 }

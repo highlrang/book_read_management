@@ -13,7 +13,7 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
     @ExceptionHandler(ApiException::class)
     fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Nothing>> {
         logUtil.logError(e.exceptionType, e.customMessage)
-        val response = ApiResponse.fail<Nothing>(e.exceptionType.code, e.exceptionType.message)
+        val response = ApiResponse.fail<Nothing>(e.exceptionType.code, e.customMessage ?: e.exceptionType.message)
         return ResponseEntity(response, HttpStatus.BAD_REQUEST)
     }
 
