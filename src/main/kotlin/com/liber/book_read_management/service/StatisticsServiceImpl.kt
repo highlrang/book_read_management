@@ -15,6 +15,7 @@ import com.liber.book_read_management.util.CategoryLabel
 import org.springframework.stereotype.Service
 import java.time.LocalDate
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.ceil
 import kotlin.math.round
 import kotlin.math.roundToInt
@@ -25,6 +26,9 @@ class StatisticsServiceImpl(
     private val bookReadProgressRepository: BookReadProgressRepository,
     private val userRepository: UserRepository
 ) : StatisticsService {
+    private companion object {
+        val MONTH_DAY_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("MM-dd")
+    }
 
     override fun getStatistics(userId: Long): StatisticsResponse {
         val readingCount = bookReadLogRepository.countByUserIdAndReadStatus(userId, BookReadStatus.READING)
@@ -182,7 +186,7 @@ class StatisticsServiceImpl(
             .sortedBy { it.key }
             .map { entry ->
                 DailyReadResponse(
-                    date = entry.key,
+                    date = entry.key.format(MONTH_DAY_FORMATTER),
                     pages = entry.value
                 )
             }

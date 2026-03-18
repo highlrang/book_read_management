@@ -4,8 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "연간 일별 읽은 페이지 응답")
 data class DailyReadResponse(
-    @Schema(description = "날짜", example = "2026-01-01")
-    val date: java.time.LocalDate,
+    @Schema(description = "월-일", example = "01-01")
+    val date: String,
     @Schema(description = "해당 날짜 읽은 페이지", example = "25")
     val pages: Int
 )
