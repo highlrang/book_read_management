@@ -147,9 +147,10 @@ class StatisticsServiceImpl(
         )
     }
 
-    override fun getYearlyDailyReads(userId: Long, year: Int): List<DailyReadResponse> {
-        val yearStart = LocalDate.of(year, 1, 1)
-        val yearEnd = LocalDate.of(year, 12, 31)
+    override fun getYearlyDailyReads(userId: Long, year: Int?): List<DailyReadResponse> {
+        val filteredYear = year ?: LocalDate.now().year
+        val yearStart = LocalDate.of(filteredYear, 1, 1)
+        val yearEnd = LocalDate.of(filteredYear, 12, 31)
         val progressList = getProgressListUntil(userId, yearEnd)
         val prevReadByBook = mutableMapOf<Long, Int>()
         val dailyTotals = mutableMapOf<LocalDate, Int>()

@@ -31,7 +31,7 @@ class StatisticsApiController(
     @GetMapping("/daily-reads")
     fun getYearlyDailyReads(
         @CurrentUserId userId: Long,
-        @RequestParam year: Int
+        @RequestParam(required = false) year: Int?
     ): ResponseEntity<ApiResponse<List<DailyReadResponse>>> {
         val response = statisticsService.getYearlyDailyReads(userId, year)
         return ResponseEntity.ok(ApiResponse.success(response))
