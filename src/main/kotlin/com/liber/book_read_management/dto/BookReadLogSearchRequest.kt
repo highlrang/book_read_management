@@ -26,14 +26,14 @@ class BookReadLogSearchRequest(
     val page: Int = 1,
     @Schema(description = "페이지 사이즈", example = "20")
     val size: Int = 20,
-    @field:Schema(description = "정렬", example = "createdAt", defaultValue = "createdAt")
-    val sort: SortType = SortType.createdAt,
+    @field:Schema(description = "정렬", example = "recentActivity", defaultValue = "recentActivity")
+    val sort: SortType = SortType.recentActivity,
     @field:Schema(description = "정렬 방향", example = "desc", defaultValue = "desc")
     val sortDirection: SortDirection = SortDirection.desc
 )
 
 enum class SortType {
-    createdAt,
+    recentActivity,
     progressPercentage,
     bookTitle
 }

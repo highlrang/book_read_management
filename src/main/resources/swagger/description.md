@@ -5,7 +5,7 @@
 | BookReadStatus | ALL, READING, COMPLETED |
 | BookPageType | TOTAL, READ |
 | GenderType | F, M |
-| SortType | createdAt |
+| SortType | recentActivity, progressPercentage, bookTitle |
 | SortDirection | asc, desc |
 
 ## Exception Codes

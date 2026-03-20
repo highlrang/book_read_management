@@ -168,10 +168,11 @@ class BookReadLogServiceImpl(
         bookReadLogId: Long,
         reviewSaveRequest: BookReviewSaveRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
+        val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         bookReviewLogRepository.save(reviewSaveRequest.toEntity(userId, bookReadLogId))
+        touchRecentActivity(bookReadLog)
     }
 
     @Transactional
@@ -180,7 +181,7 @@ class BookReadLogServiceImpl(
         bookReadLogId: Long,
         ratingSaveRequest: BookRatingSaveRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
+        val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         val bookRatingLog = bookRatingLogRepository.findByBookReadLogId(bookReadLogId)
@@ -188,6 +189,7 @@ class BookReadLogServiceImpl(
             throw ApiException(ExceptionType.ALREADY_EXIST)
 
         bookRatingLogRepository.save(ratingSaveRequest.toEntity(bookReadLogId))
+        touchRecentActivity(bookReadLog)
 
     }
 
@@ -197,13 +199,14 @@ class BookReadLogServiceImpl(
         bookReadLogId: Long,
         ratingUpdateRequest: BookRatingUpdateRequest
     ) {
-        bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
+        val bookReadLog = bookReadLogRepository.findByUserIdAndId(userId, bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         val bookRatingLog = bookRatingLogRepository.findByBookReadLogId(bookReadLogId) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
         bookRatingLog.update(ratingUpdateRequest.rating, ratingUpdateRequest.content)
+        touchRecentActivity(bookReadLog)
     }
 
     override fun getBookReviewLogs(userId: Long, bookReadLogId: Long): List<BookReviewLogResponse> {
@@ -230,6 +233,10 @@ class BookReadLogServiceImpl(
         }
 
         return bookReadPageHistoryList
+    }
+
+    private fun touchRecentActivity(bookReadLog: BookReadLog) {
+        bookReadLog.updatedAt = LocalDateTime.now()
     }
 
 }

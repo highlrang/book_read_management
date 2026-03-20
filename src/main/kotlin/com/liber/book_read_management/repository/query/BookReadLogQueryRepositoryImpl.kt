@@ -104,10 +104,10 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
         return sort.map { order ->
             val direction = if (order.isAscending) Order.ASC else Order.DESC
             when (order.property) {
-                "createdAt" -> OrderSpecifier(direction, bookReadLog.createdAt)
+                "recentActivity" -> OrderSpecifier(direction, bookReadLog.updatedAt)
                 "progressPercentage" -> OrderSpecifier(direction, bookReadLog.progressPercentage)
                 "bookTitle" -> OrderSpecifier(direction, bookReadLog.bookTitle)
-                else -> OrderSpecifier(Order.DESC, bookReadLog.createdAt)
+                else -> OrderSpecifier(Order.DESC, bookReadLog.updatedAt)
             }
         }.toList().toTypedArray()
     }
