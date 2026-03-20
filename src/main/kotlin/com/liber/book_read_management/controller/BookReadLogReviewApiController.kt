@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
-@Tag(name = "도서 리뷰 API", description = "도서 리뷰 관련 API")
+@Tag(name = "내 서재 도서 리뷰 API")
 @RestController
 @RequestMapping("/api/v1/book-read")
 class BookReadLogReviewApiController(
