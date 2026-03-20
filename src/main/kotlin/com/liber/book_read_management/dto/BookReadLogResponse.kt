@@ -34,8 +34,8 @@ open class BookReadLogResponse @QueryProjection constructor(
     @Schema(description = "생성일", example = "2026-01-01 12:00:00")
     var createdAt: LocalDateTime,
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    @Schema(description = "수정일", example = "2026-01-01 12:00:00")
-    var updatedAt: LocalDateTime
+    @Schema(description = "최근 활동일시", example = "2026-01-01 12:00:00")
+    var recentActivity: LocalDateTime
 ) {
     companion object {
         fun from(bookReadLog: BookReadLog) : BookReadLogResponse {
@@ -50,7 +50,7 @@ open class BookReadLogResponse @QueryProjection constructor(
                 readStatus = bookReadLog.readStatus,
                 progressPercentage = bookReadLog.progressPercentage,
                 createdAt = bookReadLog.createdAt!!,
-                updatedAt = bookReadLog.updatedAt!!
+                recentActivity = bookReadLog.updatedAt!!
             )
         }
     }

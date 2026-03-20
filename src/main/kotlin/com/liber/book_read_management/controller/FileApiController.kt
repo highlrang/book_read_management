@@ -23,7 +23,7 @@ class FileApiController(
     private val fileService: FileService
 ) {
 
-    @Operation(summary = "파일 업로드", description = "서버에 파일을 업로드하고 아이디를 반환합니다.")
+    @Operation(summary = "파일 업로드", description = "사용자 프로필 이미지를 업로드하는 API입니다. 응답으로 아이디가 반환됩니다.")
     @PostMapping(
         value = ["/upload"],
         consumes = [MediaType.MULTIPART_FORM_DATA_VALUE]
