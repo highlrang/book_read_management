@@ -61,7 +61,7 @@ class BookReadLogServiceImpl(
             return exist
         }
 
-        val detail = bookService.getBookDetail(isbn)
+        val detail = bookService.getBookDetailForStorage(isbn)
         val categoryPath = detail.categoryName
         val categoryGroup = CategoryClassifier.classify(categoryPath)
 

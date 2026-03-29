@@ -24,6 +24,8 @@ jobs:
           spring.data.redis.password: ${{ secrets.REDIS_PASSWORD }}
           google.ai.api-key: ${{ secrets.GEMINI_API_KEY }}
           client.aladin.ttbKey: ${{ secrets.ALADIN_KEY }}
+          client.naver.clientId: ${{ secrets.NAVER_SEARCH_CLIENT_ID }}
+          client.naver.clientSecret: ${{ secrets.NAVER_SEARCH_CLIENT_SECRET }}
           apiKey: ${{ secrets.API_KEY }}
           secretKey: ${{ secrets.SECRET_KEY }}
 

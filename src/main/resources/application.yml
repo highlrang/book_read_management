@@ -44,6 +44,9 @@ recommendation:
 client:
   aladin:
     ttbKey: ${ALADIN_KEY}
+  naver:
+    clientId: ${NAVER_SEARCH_CLIENT_ID:}
+    clientSecret: ${NAVER_SEARCH_CLIENT_SECRET:}
 
 apiKey: ${API_KEY}
 

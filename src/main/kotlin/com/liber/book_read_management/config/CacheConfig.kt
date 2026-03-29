@@ -14,12 +14,12 @@ class CacheConfig {
 
     @Bean
     fun cacheManager(): CacheManager {
-        val cacheManager = CaffeineCacheManager("recommendations")
+        val cacheManager = CaffeineCacheManager("recommendations", "naverBookImages")
         cacheManager.setCaffeine(
-            // 추천 결과 전체를 1시간 캐시해서, 같은 입력으로 반복 호출될 때 LLM/외부 API 비용을 줄인다.
+            // 추천 결과를 1시간 캐시해 반복 외부 호출을 줄인다.
             Caffeine.newBuilder()
                 .expireAfterWrite(Duration.ofHours(1))
-                .maximumSize(1_000)
+                .maximumSize(10_000)
         )
         return cacheManager
     }

@@ -21,3 +21,4 @@ file:
 logging:
   level:
     com.liber.book_read_management.client.AladinClient: DEBUG
+    com.liber.book_read_management.client.NaverSearchClient: DEBUG
