@@ -8,4 +8,6 @@ interface BookService {
     fun getBookCategories() : List<BookCategoryResponse>
 
     fun getBookDetail(isbn: String) : BookDetailResponse
+    fun getBookDetailForStorage(isbn: String) : BookDetailResponse
+    fun getBookPageInfo(isbn: String) : BookPageInfoResponse
 }

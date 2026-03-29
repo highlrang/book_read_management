@@ -3,6 +3,7 @@ package com.liber.book_read_management.service
 import com.liber.book_read_management.client.AladinClient
 import com.liber.book_read_management.dto.BookCategoryResponse
 import com.liber.book_read_management.dto.BookDetailResponse
+import com.liber.book_read_management.dto.BookPageInfoResponse
 import com.liber.book_read_management.dto.BookSearchRequest
 import com.liber.book_read_management.dto.BookSearchResponse
 import com.liber.book_read_management.dto.PageResponse
@@ -12,7 +13,8 @@ import org.springframework.stereotype.Service
 
 @Service
 class BookServiceImpl(
-    var aladinClient: AladinClient
+    var aladinClient: AladinClient,
+    private val naverBookImageService: NaverBookImageService
 ) : BookService {
 
     override fun searchBook(bookSearchRequest: BookSearchRequest): PageResponse<List<BookSearchResponse>> {
@@ -39,8 +41,13 @@ class BookServiceImpl(
                     sort = bookSearchRequest.sort.value
                 )
 
-        val bookSearchResponseList = (aladinBookSearchResponse.item ?: emptyList())
-            .map { item -> BookSearchResponse.of(item) }
+        val aladinItems = aladinBookSearchResponse.item ?: emptyList()
+        val naverCovers = naverBookImageService.resolveListCovers(aladinItems)
+        val bookSearchResponseList = aladinItems.mapIndexed { index, item ->
+            BookSearchResponse.of(item).apply {
+                cover = naverCovers[index] ?: item.cover
+            }
+        }
 
         return PageResponse(
             bookSearchRequest.page,
@@ -63,6 +70,20 @@ class BookServiceImpl(
     override fun getBookDetail(isbn: String): BookDetailResponse {
         val aladinBookDetailResponse = aladinClient.getItem(itemItem = isbn)
         return BookDetailResponse.of(aladinBookDetailResponse)
+    }
+
+    override fun getBookDetailForStorage(isbn: String): BookDetailResponse {
+        return getBookDetail(isbn)
+    }
+
+    override fun getBookPageInfo(isbn: String): BookPageInfoResponse {
+        val aladinBookDetailResponse = aladinClient.getItem(itemItem = isbn)
+        val item = aladinBookDetailResponse.item?.firstOrNull()
+
+        return BookPageInfoResponse(
+            isbn = isbn,
+            totalPage = item?.subInfo?.itemPage
+        )
     }
 
     private fun toBookCategoryLabel(category: BookCategory): String {

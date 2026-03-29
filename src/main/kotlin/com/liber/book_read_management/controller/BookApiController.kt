@@ -17,8 +17,9 @@ class BookApiController(
 
     @Operation(
         summary = "도서 검색",
-        description = "(알라딘 API) 검색어로 도서를 검색합니다. 검색어가 없으면 BestSeller를 조회합니다.\n" +
-            "sort/queryType은 검색어가 있는 경우에만 적용됩니다.\n페이지당 사이즈는 20으로 고정입니다."
+        description = "알라딘 API로 도서를 검색합니다. 검색어가 없으면 BestSeller를 조회합니다. " +
+            "응답의 표지는 네이버 책 검색 이미지로 보강될 수 있습니다.\n" +
+            "페이지당 사이즈는 20으로 고정입니다."
     )
     @GetMapping
     fun searchBook(
@@ -34,10 +35,18 @@ class BookApiController(
         return ResponseEntity.ok(ApiResponse.success(bookService.getBookCategories()))
     }
 
-    @Operation(summary = "도서 상세 조회", description = "ISBN으로 도서 상세 정보를 조회합니다.")
+    @Deprecated("Use /api/v1/book/{isbn}/page-info for total page lookup and use list response data for book metadata.")
+    @Operation(summary = "도서 상세 조회", description = "ISBN으로 도서 상세 정보를 조회합니다.", deprecated = true)
     @GetMapping("/{isbn}")
     fun getBookDetail(@PathVariable("isbn") isbn: String) : ResponseEntity<ApiResponse<BookDetailResponse>> {
         val bookResponse = bookService.getBookDetail(isbn)
         return ResponseEntity.ok(ApiResponse.success(bookResponse))
+    }
+
+    @Operation(summary = "도서 페이지 수 조회", description = "ISBN으로 도서 전체 페이지 수를 조회합니다.")
+    @GetMapping("/{isbn}/page-info")
+    fun getBookPageInfo(@PathVariable("isbn") isbn: String) : ResponseEntity<ApiResponse<BookPageInfoResponse>> {
+        val bookPageInfoResponse = bookService.getBookPageInfo(isbn)
+        return ResponseEntity.ok(ApiResponse.success(bookPageInfoResponse))
     }
 }
