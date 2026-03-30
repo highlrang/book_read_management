@@ -37,13 +37,13 @@ class BookDetailResponse (
 ){
 
     companion object {
-        fun of(aladinBookDetail: AladinBookDetailResponse) : BookDetailResponse {
+        fun of(aladinBookDetail: AladinBookDetailResponse, coverOverride: String? = null) : BookDetailResponse {
             val item = aladinBookDetail.item?.firstOrNull()
             val subInfo = item?.subInfo
 
             return BookDetailResponse(
                 logo = aladinBookDetail.logo,
-                cover = item?.cover,
+                cover = coverOverride ?: item?.cover,
                 link = aladinBookDetail.link,
                 title = item?.title,
                 description = item?.description,

@@ -69,7 +69,7 @@ class BookServiceImpl(
 
     override fun getBookDetail(isbn: String): BookDetailResponse {
         val aladinBookDetailResponse = aladinClient.getItem(itemItem = isbn)
-        return BookDetailResponse.of(aladinBookDetailResponse)
+        return toBookDetailResponse(aladinBookDetailResponse)
     }
 
     override fun getBookDetailForStorage(isbn: String): BookDetailResponse {
@@ -84,6 +84,15 @@ class BookServiceImpl(
             isbn = isbn,
             totalPage = item?.subInfo?.itemPage
         )
+    }
+
+    private fun toBookDetailResponse(
+        aladinBookDetailResponse: com.liber.book_read_management.dto.aladin.AladinBookDetailResponse
+    ): BookDetailResponse {
+        val item = aladinBookDetailResponse.item?.firstOrNull()
+        val resolvedCover = naverBookImageService.resolveCover(item?.isbn13, item?.isbn)
+
+        return BookDetailResponse.of(aladinBookDetailResponse, resolvedCover)
     }
 
     private fun toBookCategoryLabel(category: BookCategory): String {
