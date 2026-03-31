@@ -126,14 +126,21 @@ class BookReadLogServiceImpl(
             bookReadProgressRepository.findTopByUserIdAndBookReadLogIdOrderByIdDesc(userId, bookReadLogId)
 
         if (type == BookPageType.TOTAL) {
-            bookReadLog.totalPage = page
             val currentReadPage = lastProgress?.readPage ?: 0
+            if (page > 0 && currentReadPage > page) {
+                throw ApiException(ExceptionType.VALIDATION_ERROR, "전체 페이지는 현재 읽은 페이지보다 작을 수 없습니다.")
+            }
+
+            bookReadLog.totalPage = page
             bookReadLog.progressPercentage = calculateProgressInt(bookReadLog.totalPage, currentReadPage)
             updateReadStatus(bookReadLog, currentReadPage)
 
         } else {
             if ((lastProgress?.readPage ?: 0) >= page) {
                 throw ApiException(ExceptionType.VALIDATION_ERROR)
+            }
+            if (bookReadLog.totalPage > 0 && page > bookReadLog.totalPage) {
+                throw ApiException(ExceptionType.VALIDATION_ERROR, "읽은 페이지는 전체 페이지를 초과할 수 없습니다.")
             }
 
             val prevReadPage = lastProgress?.readPage ?: 0
