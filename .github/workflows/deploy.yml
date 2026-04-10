@@ -28,6 +28,11 @@ jobs:
           client.naver.clientSecret: ${{ secrets.NAVER_SEARCH_CLIENT_SECRET }}
           apiKey: ${{ secrets.API_KEY }}
           secretKey: ${{ secrets.SECRET_KEY }}
+          auth.encryption.key-id: ${{ secrets.AUTH_ENCRYPTION_KEY_ID }}
+          auth.encryption.algorithm: ${{ secrets.AUTH_ENCRYPTION_ALGORITHM }}
+          auth.encryption.public-key: ${{ secrets.AUTH_ENCRYPTION_PUBLIC_KEY }}
+          auth.encryption.private-key: ${{ secrets.AUTH_ENCRYPTION_PRIVATE_KEY }}
+          auth.encryption.allow-plain-password: ${{ secrets.AUTH_ENCRYPTION_ALLOW_PLAIN_PASSWORD }}
 
 
       - name: Docker Hub Login

@@ -54,3 +54,11 @@ secretKey: ${SECRET_KEY}
 
 fcm:
   server-key: ${FCM_SERVER_KEY:}
+
+auth:
+  encryption:
+    key-id: ${AUTH_ENCRYPTION_KEY_ID:primary}
+    algorithm: ${AUTH_ENCRYPTION_ALGORITHM:RSA/ECB/OAEPWithSHA-256AndMGF1Padding}
+    public-key: ${AUTH_ENCRYPTION_PUBLIC_KEY:}
+    private-key: ${AUTH_ENCRYPTION_PRIVATE_KEY:}
+    allow-plain-password: ${AUTH_ENCRYPTION_ALLOW_PLAIN_PASSWORD:true}

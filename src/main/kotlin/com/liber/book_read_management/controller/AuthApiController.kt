@@ -2,11 +2,13 @@ package com.liber.book_read_management.controller;
 
 import com.liber.book_read_management.auth.CurrentUserId
 import com.liber.book_read_management.dto.*
+import com.liber.book_read_management.service.AuthEncryptionService
 import com.liber.book_read_management.service.EmailService
 import com.liber.book_read_management.service.UserService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -17,7 +19,8 @@ import org.springframework.web.bind.annotation.RestController
 @RequestMapping("/api/v1/auth")
 class AuthApiController(
     private val userService: UserService,
-    private val emailService: EmailService
+    private val emailService: EmailService,
+    private val authEncryptionService: AuthEncryptionService
 ) {
 
     @Operation(summary = "닉네임 중복 확인")
@@ -28,6 +31,24 @@ class AuthApiController(
         )
     }
 
+    @Operation(summary = "인증 공개키 조회", description = "RSA 공개키와 비밀번호 암호화 정보를 조회합니다.")
+    @GetMapping("/public-key")
+    fun getPublicKey(): ResponseEntity<ApiResponse<AuthPublicKeyResponse>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(authEncryptionService.getPublicKey())
+        )
+    }
+
+    @Operation(
+        summary = "비밀번호 암호화",
+        description = "서버 테스트 및 Swagger 검증용 보조 API입니다. 실제 앱에서는 클라이언트가 공개키로 직접 암호화해야 합니다."
+    )
+    @PostMapping("/encrypt-password")
+    fun encryptPassword(@RequestBody request: EncryptPasswordRequest): ResponseEntity<ApiResponse<EncryptPasswordResponse>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(authEncryptionService.encryptPassword(request.password))
+        )
+    }
 
     @Operation(summary = "회원가입", description = "사용자 정보를 입력받아 회원가입을 처리합니다.")
     @PostMapping("/sign-up")
@@ -75,4 +96,3 @@ class AuthApiController(
     }
 
 }
-

@@ -22,7 +22,8 @@ class UserServiceImpl(
     private var bcryptEncoder: BCryptPasswordEncoder,
     private var tokenUtil: TokenUtil,
     private var authRedisStore: AuthRedisStore,
-    private val pushNotificationService: PushNotificationService
+    private val pushNotificationService: PushNotificationService,
+    private val authEncryptionService: AuthEncryptionService
 ) : UserService {
 
     override fun checkNickname(nickname: String): NicknameCheckResponse {
@@ -31,6 +32,7 @@ class UserServiceImpl(
 
     @Transactional
     override fun signUp(request: SignUpRequest): AuthResponse {
+        val rawPassword = authEncryptionService.resolvePassword(request.password, request.encryptedPassword)
         val existUser = userRepository.findByEmail(request.email)
         if (existUser != null) {
             throw ApiException(ExceptionType.ALREADY_EXIST)
@@ -40,7 +42,7 @@ class UserServiceImpl(
 
         val user = userRepository.save(User(
             email = request.email,
-            password = encryptPassword(request.password),
+            password = encryptPassword(rawPassword),
             nickname = request.nickname,
             photoId = request.photoId
         ))
@@ -55,10 +57,11 @@ class UserServiceImpl(
 
     @Transactional
     override fun login(request: LoginRequest) : AuthResponse {
+        val rawPassword = authEncryptionService.resolvePassword(request.password, request.encryptedPassword)
         val user = userRepository.findByEmail(request.email) ?:
             throw ApiException(ExceptionType.DATA_NOT_FOUND)
 
-        if (!bcryptEncoder.matches(request.password, user.password))
+        if (!bcryptEncoder.matches(rawPassword, user.password))
             throw ApiException(ExceptionType.PASSWORD_NOT_MATCHED)
 
         val userId = user.id!!
@@ -100,9 +103,10 @@ class UserServiceImpl(
 
     @Transactional
     override fun updatePassword(request: UpdatePasswordRequest) {
+        val rawPassword = authEncryptionService.resolvePassword(request.password, request.encryptedPassword)
         val user = userRepository.findByEmail(request.email)
             ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
-        user.password = encryptPassword(request.password)
+        user.password = encryptPassword(rawPassword)
     }
 
     override fun verifyEmail(email: String, code: String) {
