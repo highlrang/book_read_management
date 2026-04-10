@@ -24,12 +24,13 @@ class AuthEncryptionService(
     publicKeyPem: String,
     @Value("\${auth.encryption.private-key:}")
     privateKeyPem: String,
-    @Value("\${auth.encryption.allow-plain-password:true}")
-    private val allowPlainPassword: Boolean
+    @Value("\${auth.encryption.allow-plain-password:}")
+    allowPlainPassword: String
 ) {
     private val publicKeyPem = normalizePem(publicKeyPem)
     private val publicKey: PublicKey? = parsePublicKey(this.publicKeyPem)
     private val privateKey: PrivateKey? = parsePrivateKey(normalizePem(privateKeyPem))
+    private val allowPlainPassword: Boolean = parseAllowPlainPassword(allowPlainPassword)
 
     fun getPublicKey(): AuthPublicKeyResponse {
         val encryptKey = publicKey
@@ -116,6 +117,17 @@ class AuthEncryptionService(
     }
 
     private fun normalizePem(value: String): String = value.trim().replace("\\n", "\n")
+
+    private fun parseAllowPlainPassword(value: String): Boolean {
+        return when (value.trim().lowercase()) {
+            "", "true" -> true
+            "false" -> false
+            else -> throw ApiException(
+                ExceptionType.VALIDATION_ERROR,
+                "auth.encryption.allow-plain-password 설정값은 true 또는 false 여야 합니다."
+            )
+        }
+    }
 
     private fun decodePem(pem: String, keyType: String): ByteArray {
         val normalized = pem
