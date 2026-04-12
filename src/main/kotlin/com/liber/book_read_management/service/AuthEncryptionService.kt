@@ -24,9 +24,9 @@ private val log = KotlinLogging.logger {}
 @Service
 class AuthEncryptionService(
     @Value("\${auth.encryption.key-id:primary}")
-    private val keyId: String,
+    keyIdValue: String,
     @Value("\${auth.encryption.algorithm:RSA/ECB/OAEPWithSHA-256AndMGF1Padding}")
-    private val algorithm: String,
+    algorithmValue: String,
     @Value("\${auth.encryption.public-key:}")
     publicKeyPem: String,
     @Value("\${auth.encryption.private-key:}")
@@ -34,6 +34,13 @@ class AuthEncryptionService(
     @Value("\${auth.encryption.allow-plain-password:}")
     allowPlainPassword: String
 ) {
+    private companion object {
+        const val DEFAULT_KEY_ID = "primary"
+        const val DEFAULT_ALGORITHM = "RSA/ECB/OAEPWithSHA-256AndMGF1Padding"
+    }
+
+    private val keyId = keyIdValue.ifBlank { DEFAULT_KEY_ID }
+    private val algorithm = algorithmValue.ifBlank { DEFAULT_ALGORITHM }
     private val publicKeyPem = normalizePem(publicKeyPem)
     private val publicKey: PublicKey? = parsePublicKey(this.publicKeyPem)
     private val privateKey: PrivateKey? = parsePrivateKey(normalizePem(privateKeyPem))
