@@ -4,15 +4,22 @@ import com.liber.book_read_management.dto.AuthPublicKeyResponse
 import com.liber.book_read_management.dto.EncryptPasswordResponse
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.security.KeyFactory
+import java.security.Key
 import java.security.PrivateKey
 import java.security.PublicKey
+import java.security.spec.MGF1ParameterSpec
 import java.security.spec.PKCS8EncodedKeySpec
 import java.security.spec.X509EncodedKeySpec
 import java.util.Base64
 import javax.crypto.Cipher
+import javax.crypto.spec.OAEPParameterSpec
+import javax.crypto.spec.PSource
+
+private val log = KotlinLogging.logger {}
 
 @Service
 class AuthEncryptionService(
@@ -52,8 +59,7 @@ class AuthEncryptionService(
         }
 
         return try {
-            val cipher = Cipher.getInstance(algorithm)
-            cipher.init(Cipher.ENCRYPT_MODE, encryptKey)
+            val cipher = initCipher(Cipher.ENCRYPT_MODE, encryptKey)
             val encrypted = cipher.doFinal(password.toByteArray(Charsets.UTF_8))
             EncryptPasswordResponse(
                 keyId = keyId,
@@ -61,6 +67,7 @@ class AuthEncryptionService(
                 encryptedPassword = Base64.getEncoder().encodeToString(encrypted)
             )
         } catch (e: Exception) {
+            log.error(e) { "Password encryption failed. keyId=$keyId, algorithm=$algorithm" }
             throw ApiException(ExceptionType.VALIDATION_ERROR, "비밀번호 암호화에 실패했습니다.")
         }
     }
@@ -87,12 +94,30 @@ class AuthEncryptionService(
             ?: throw ApiException(ExceptionType.VALIDATION_ERROR, "인증 복호화 키가 설정되지 않았습니다.")
 
         return try {
-            val cipher = Cipher.getInstance(algorithm)
-            cipher.init(Cipher.DECRYPT_MODE, decryptKey)
+            val cipher = initCipher(Cipher.DECRYPT_MODE, decryptKey)
             val decrypted = cipher.doFinal(Base64.getDecoder().decode(encryptedPassword))
             String(decrypted, Charsets.UTF_8)
         } catch (e: Exception) {
+            log.error(e) { "Password decryption failed. keyId=$keyId, algorithm=$algorithm" }
             throw ApiException(ExceptionType.VALIDATION_ERROR, "비밀번호 복호화에 실패했습니다.")
+        }
+    }
+
+    private fun initCipher(mode: Int, key: Key): Cipher {
+        if (algorithm.equals("RSA/ECB/OAEPWithSHA-256AndMGF1Padding", ignoreCase = true)) {
+            val cipher = Cipher.getInstance("RSA/ECB/OAEPPadding")
+            val oaepSpec = OAEPParameterSpec(
+                "SHA-256",
+                "MGF1",
+                MGF1ParameterSpec.SHA256,
+                PSource.PSpecified.DEFAULT
+            )
+            cipher.init(mode, key, oaepSpec)
+            return cipher
+        }
+
+        return Cipher.getInstance(algorithm).apply {
+            init(mode, key)
         }
     }
 
