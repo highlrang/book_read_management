@@ -1,6 +1,6 @@
 package com.liber.book_read_management.entities
 
-import com.liber.book_read_management.enums.GenderType
+import com.liber.book_read_management.config.SensitiveStringEncryptConverter
 import jakarta.persistence.*
 import java.time.LocalTime
 
@@ -25,9 +25,9 @@ class User (
 //    var addressLatitude: Double? = null,
 //    @Column(name = "address_longitude")
 //    var addressLongitude: Double? = null,
-    @Column(name = "access_token")
+    @Column(name = "access_token", length = 128)
     var accessToken: String? = null,
-    @Column(name = "refresh_token")
+    @Column(name = "refresh_token", length = 128)
     var refreshToken: String? = null,
     @Column(name = "monthly_goal_pages")
     var monthlyGoalPages: Int? = null,
@@ -37,6 +37,7 @@ class User (
     var notificationEnabled: Boolean = false,
     @Column(name = "notification_time")
     var notificationTime: LocalTime? = null,
+    @Convert(converter = SensitiveStringEncryptConverter::class)
     @Column(name = "fcm_token", length = 1000)
     var fcmToken: String? = null
 ) : BaseTimeEntity()

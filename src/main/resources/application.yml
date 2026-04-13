@@ -62,3 +62,11 @@ auth:
     public-key: ${AUTH_ENCRYPTION_PUBLIC_KEY:}
     private-key: ${AUTH_ENCRYPTION_PRIVATE_KEY:}
     allow-plain-password: ${AUTH_ENCRYPTION_ALLOW_PLAIN_PASSWORD:true}
+  email-verification:
+    link-base-url: ${AUTH_EMAIL_VERIFICATION_LINK_BASE_URL:}
+
+security:
+  sensitive-data:
+    secret: ${SENSITIVE_DATA_SECRET:${SECRET_KEY:}}
+  token-hash:
+    secret: ${TOKEN_HASH_SECRET:${SECRET_KEY:}}

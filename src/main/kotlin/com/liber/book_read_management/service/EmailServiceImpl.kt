@@ -1,25 +1,26 @@
 package com.liber.book_read_management.service
 
-import com.liber.book_read_management.repository.redis.AuthRedisStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.mail.javamail.MimeMessageHelper
 import org.springframework.stereotype.Service
+import java.security.SecureRandom
 import java.util.*
 
 @Service
 class EmailServiceImpl(
     @Value("\${myDomain}") private val myDomain: String,
+    @Value("\${auth.email-verification.link-base-url:}") private val emailVerificationLinkBaseUrl: String,
     private val javaMailSender: JavaMailSender,
-    private val authRedisStore: AuthRedisStore
+    private val emailVerificationService: EmailVerificationService
 ) : EmailService {
 
+    private val secureRandom = SecureRandom()
+
     override fun sendVerificationEmail(email: String) {
-        val verificationCode = String.format("%06d", Random().nextInt(1000000))
-
-        authRedisStore.setEmailVerifyCode(email, verificationCode)
-
-        val verificationUrl = "${myDomain}/auth/verify-email?email=${email}&code=${verificationCode}"
+        val verificationToken = generateVerificationToken()
+        emailVerificationService.issueToken(email, verificationToken)
+        val verificationUrl = buildVerificationUrl(verificationToken)
 
         val message = javaMailSender.createMimeMessage()
         val helper = MimeMessageHelper(message, true)
@@ -72,5 +73,17 @@ class EmailServiceImpl(
         helper.setText(htmlBody, true)
 
         javaMailSender.send(message)
+    }
+
+    private fun generateVerificationToken(): String {
+        val bytes = ByteArray(32)
+        secureRandom.nextBytes(bytes)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)
+    }
+
+    private fun buildVerificationUrl(token: String): String {
+        val baseUrl = emailVerificationLinkBaseUrl.ifBlank { "${myDomain}/auth/verify-email" }
+        val separator = if (baseUrl.contains("?")) "&" else "?"
+        return "${baseUrl}${separator}token=${token}"
     }
 }

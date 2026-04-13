@@ -5,6 +5,7 @@ import com.liber.book_read_management.entities.User
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import com.liber.book_read_management.repository.UserRepository
+import com.liber.book_read_management.service.TokenHashService
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
@@ -18,7 +19,8 @@ import org.springframework.web.filter.OncePerRequestFilter
 @Component
 class AuthFilter(
     private var userRepository: UserRepository,
-    private var tokenUtil: TokenUtil
+    private var tokenUtil: TokenUtil,
+    private val tokenHashService: TokenHashService
 ) : OncePerRequestFilter() {
 
     companion object {
@@ -72,8 +74,10 @@ class AuthFilter(
 
             val user: User = userRepository.findById(userId)
                 .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
-            val accessToken = user.accessToken ?: throw ApiException(ExceptionType.INVALID_AUTH)
-            tokenUtil.matchToken(token, accessToken)
+            val accessTokenHash = user.accessToken ?: throw ApiException(ExceptionType.INVALID_AUTH)
+            if (!tokenHashService.matches(token, accessTokenHash)) {
+                throw ApiException(ExceptionType.INVALID_AUTH)
+            }
 
             RequestContextHolder.currentRequestAttributes()
                 .setAttribute("userId", userId, RequestAttributes.SCOPE_REQUEST)

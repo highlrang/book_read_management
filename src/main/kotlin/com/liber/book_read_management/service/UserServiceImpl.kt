@@ -21,9 +21,11 @@ class UserServiceImpl(
     private val fileService: FileService,
     private var bcryptEncoder: BCryptPasswordEncoder,
     private var tokenUtil: TokenUtil,
-    private var authRedisStore: AuthRedisStore,
+    private val authRedisStore: AuthRedisStore,
+    private val emailVerificationService: EmailVerificationService,
     private val pushNotificationService: PushNotificationService,
-    private val authEncryptionService: AuthEncryptionService
+    private val authEncryptionService: AuthEncryptionService,
+    private val tokenHashService: TokenHashService
 ) : UserService {
 
     override fun checkNickname(nickname: String): NicknameCheckResponse {
@@ -38,7 +40,9 @@ class UserServiceImpl(
             throw ApiException(ExceptionType.ALREADY_EXIST)
         }
 
-        authRedisStore.checkVerifiedEmail(request.email)
+        if (!emailVerificationService.isVerified(request.email) && !authRedisStore.isVerifiedEmail(request.email)) {
+            throw ApiException(ExceptionType.VALIDATION_ERROR)
+        }
 
         val user = userRepository.save(User(
             email = request.email,
@@ -49,8 +53,8 @@ class UserServiceImpl(
         val userId = user.id!!
         val accessToken = tokenUtil.createAccessToken(userId)
         val refreshToken = tokenUtil.createRefreshToken(userId)
-        user.accessToken = accessToken
-        user.refreshToken = refreshToken
+        user.accessToken = tokenHashService.hash(accessToken)
+        user.refreshToken = tokenHashService.hash(refreshToken)
 
         return AuthResponse(userId, accessToken, refreshToken)
     }
@@ -68,8 +72,8 @@ class UserServiceImpl(
         val accessToken = tokenUtil.createAccessToken(userId)
         val refreshToken = tokenUtil.createRefreshToken(userId)
 
-        user.accessToken = accessToken
-        user.refreshToken = refreshToken
+        user.accessToken = tokenHashService.hash(accessToken)
+        user.refreshToken = tokenHashService.hash(refreshToken)
         if (!request.fcmToken.isNullOrBlank()) {
             user.fcmToken = request.fcmToken
         }
@@ -83,6 +87,7 @@ class UserServiceImpl(
             .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
 
         user.accessToken = null
+        user.refreshToken = null
     }
 
     @Transactional
@@ -92,11 +97,15 @@ class UserServiceImpl(
         val user = userRepository.findById(userId)
             .orElseThrow { throw ApiException(ExceptionType.DATA_NOT_FOUND) }
 
+        if (!tokenHashService.matches(refreshToken, user.refreshToken)) {
+            throw ApiException(ExceptionType.INVALID_AUTH)
+        }
+
         val newAccessToken = tokenUtil.createAccessToken(user.id!!)
         val newRefreshToken = tokenUtil.createRefreshToken(user.id!!)
 
-        user.accessToken = newAccessToken
-        user.refreshToken = newRefreshToken
+        user.accessToken = tokenHashService.hash(newAccessToken)
+        user.refreshToken = tokenHashService.hash(newRefreshToken)
 
         return AuthResponse(user.id!!, newAccessToken, newRefreshToken)
     }
@@ -109,11 +118,22 @@ class UserServiceImpl(
         user.password = encryptPassword(rawPassword)
     }
 
-    override fun verifyEmail(email: String, code: String) {
-        val savedCode = authRedisStore.getEmailVerifyCode(email)
-        if (savedCode != code)
-            throw ApiException(ExceptionType.VALIDATION_ERROR)
-        authRedisStore.setVerifiedEmail(email)
+    override fun verifyEmail(token: String?, email: String?, code: String?) {
+        if (!token.isNullOrBlank()) {
+            emailVerificationService.verifyToken(token)
+            return
+        }
+
+        if (!email.isNullOrBlank() && !code.isNullOrBlank()) {
+            val savedCode = authRedisStore.getEmailVerifyCode(email)
+            if (savedCode != code) {
+                throw ApiException(ExceptionType.VALIDATION_ERROR)
+            }
+            authRedisStore.setVerifiedEmail(email)
+            return
+        }
+
+        throw ApiException(ExceptionType.VALIDATION_ERROR)
     }
 
     @Transactional(readOnly = true)
