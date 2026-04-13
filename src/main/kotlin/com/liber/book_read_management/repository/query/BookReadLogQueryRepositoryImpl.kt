@@ -42,7 +42,7 @@ class BookReadLogQueryRepositoryImpl(val jpaQueryFactory: JPAQueryFactory) : Boo
                     .from(bookReadProgress)
                     .where(bookReadProgress.bookReadLogId.eq(bookReadLog.id)),
                 bookReadLog.readStatus,
-                bookReadLog.progressPercentage,
+                bookReadLog.progressPercentage.coalesce(0),
                 bookReadLog.createdAt,
                 bookReadLog.updatedAt
             )

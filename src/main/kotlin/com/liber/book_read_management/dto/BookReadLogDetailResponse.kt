@@ -52,7 +52,7 @@ open class BookReadLogDetailResponse (
                 totalPage = bookReadLog.totalPage,
                 readPage = 0,
                 readStatus = bookReadLog.readStatus,
-                progressPercentage = bookReadLog.progressPercentage,
+                progressPercentage = bookReadLog.progressPercentage ?: 0,
                 reviews = null,
                 createdAt = bookReadLog.createdAt!!,
                 updatedAt = bookReadLog.updatedAt!!

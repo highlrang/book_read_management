@@ -48,7 +48,7 @@ open class BookReadLogResponse @QueryProjection constructor(
                 totalPage = bookReadLog.totalPage,
                 readPage = 0,
                 readStatus = bookReadLog.readStatus,
-                progressPercentage = bookReadLog.progressPercentage,
+                progressPercentage = bookReadLog.progressPercentage ?: 0,
                 createdAt = bookReadLog.createdAt!!,
                 recentActivity = bookReadLog.updatedAt!!
             )

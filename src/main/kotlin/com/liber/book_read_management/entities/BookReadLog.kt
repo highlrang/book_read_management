@@ -36,7 +36,7 @@ class BookReadLog (
     @Column(name = "read_status")
     var readStatus: BookReadStatus = BookReadStatus.READING,
     @Column(name = "progress_percentage")
-    var progressPercentage: Int = 0,
+    var progressPercentage: Int? = 0,
     @Column(name = "category_path")
     var categoryPath: String? = null,
     @Enumerated(EnumType.STRING)
