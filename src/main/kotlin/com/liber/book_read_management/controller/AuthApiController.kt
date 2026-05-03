@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @Tag(name = "인증 API", description = "사용자 인증 관련 API")
@@ -85,6 +86,13 @@ class AuthApiController(
     @PostMapping("/send-verification-email")
     fun sendVerificationEmail(@RequestBody request: SendEmailRequest): ResponseEntity<ApiResponse<Unit>> {
         emailService.sendVerificationEmail(request.email)
+        return ResponseEntity.ok(ApiResponse.success())
+    }
+
+    @Operation(summary = "이메일 인증 토큰 검증", description = "앱 딥링크에서 전달받은 이메일 인증 토큰을 검증합니다.")
+    @GetMapping("/verify-email")
+    fun verifyEmail(@RequestParam token: String): ResponseEntity<ApiResponse<Unit>> {
+        userService.verifyEmailToken(token)
         return ResponseEntity.ok(ApiResponse.success())
     }
 

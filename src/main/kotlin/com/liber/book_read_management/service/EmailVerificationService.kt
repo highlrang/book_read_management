@@ -4,6 +4,7 @@ import com.liber.book_read_management.entities.EmailVerification
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
 import com.liber.book_read_management.repository.EmailVerificationRepository
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -11,10 +12,11 @@ import java.time.LocalDateTime
 @Service
 class EmailVerificationService(
     private val emailVerificationRepository: EmailVerificationRepository,
-    private val tokenHashService: TokenHashService
+    private val tokenHashService: TokenHashService,
+    @Value("\${auth.email-verification.ttl-seconds:600}") private val ttlSeconds: Long
 ) {
     @Transactional
-    fun issueToken(email: String, token: String, ttlSeconds: Long = 600): String {
+    fun issueToken(email: String, token: String): String {
         val now = LocalDateTime.now()
         val verification = emailVerificationRepository.findByEmail(email) ?: EmailVerification(email = email)
         verification.tokenHash = tokenHashService.hash(token)
@@ -26,17 +28,19 @@ class EmailVerificationService(
 
     @Transactional
     fun verifyToken(token: String) {
-        val tokenHash = tokenHashService.hash(token) ?: throw ApiException(ExceptionType.VALIDATION_ERROR)
+        val tokenHash = tokenHashService.hash(token) ?: throw ApiException(ExceptionType.INVALID_EMAIL_VERIFICATION_TOKEN)
         val verification = emailVerificationRepository.findByTokenHash(tokenHash)
-            ?: throw ApiException(ExceptionType.VALIDATION_ERROR)
+            ?: throw ApiException(ExceptionType.INVALID_EMAIL_VERIFICATION_TOKEN)
 
         if (verification.expiresAt.isBefore(LocalDateTime.now())) {
-            throw ApiException(ExceptionType.VALIDATION_ERROR)
+            throw ApiException(ExceptionType.EXPIRED_EMAIL_VERIFICATION_TOKEN)
         }
 
         verification.verifiedAt = LocalDateTime.now()
         verification.tokenHash = null
     }
+
+    fun getTtlSeconds(): Long = ttlSeconds
 
     @Transactional(readOnly = true)
     fun ensureVerified(email: String) {
