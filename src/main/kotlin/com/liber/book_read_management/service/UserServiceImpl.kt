@@ -3,8 +3,10 @@ package com.liber.book_read_management.service
 import com.liber.book_read_management.auth.TokenUtil
 import com.liber.book_read_management.dto.*
 import com.liber.book_read_management.entities.User
+import com.liber.book_read_management.enums.SocialProvider
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import com.liber.book_read_management.exception.SocialProviderMismatchException
 import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.repository.UserRepository
 import com.liber.book_read_management.repository.redis.AuthRedisStore
@@ -25,7 +27,8 @@ class UserServiceImpl(
     private val emailVerificationService: EmailVerificationService,
     private val pushNotificationService: PushNotificationService,
     private val authEncryptionService: AuthEncryptionService,
-    private val tokenHashService: TokenHashService
+    private val tokenHashService: TokenHashService,
+    private val socialProfileService: SocialProfileService
 ) : UserService {
 
     override fun checkNickname(nickname: String): NicknameCheckResponse {
@@ -57,6 +60,43 @@ class UserServiceImpl(
         user.refreshToken = tokenHashService.hash(refreshToken)
 
         return AuthResponse(userId, accessToken, refreshToken)
+    }
+
+    @Transactional
+    override fun socialLogin(request: SocialLoginRequest): SocialLoginResponse {
+        if (request.provider == SocialProvider.LOCAL || request.token.isBlank()) {
+            throw ApiException(ExceptionType.VALIDATION_ERROR)
+        }
+
+        val profile = socialProfileService.getProfile(request.provider, request.token)
+        val socialUser = userRepository.findBySocialProviderAndSocialId(profile.provider, profile.socialId)
+        if (socialUser != null) {
+            return issueSocialAuthTokens(socialUser)
+        }
+
+        val emailUser = userRepository.findByEmail(profile.email)
+        if (emailUser != null) {
+            val registeredProvider = emailUser.socialProvider ?: SocialProvider.LOCAL
+            if (emailUser.socialProvider == profile.provider && emailUser.socialId == profile.socialId) {
+                return issueSocialAuthTokens(emailUser)
+            }
+            throw SocialProviderMismatchException(
+                registeredProvider = registeredProvider,
+                message = "이미 ${registeredProvider.name} 계정으로 가입된 이메일입니다."
+            )
+        }
+
+        val user = userRepository.save(
+            User(
+                email = profile.email,
+                password = "",
+                nickname = generateUniqueSocialNickname(profile),
+                socialProvider = profile.provider,
+                socialId = profile.socialId
+            )
+        )
+
+        return issueSocialAuthTokens(user)
     }
 
     @Transactional
@@ -207,6 +247,35 @@ class UserServiceImpl(
 
     fun encryptPassword(password: String) : String {
         return bcryptEncoder.encode(password)
+    }
+
+    private fun issueSocialAuthTokens(user: User): SocialLoginResponse {
+        val userId = user.id ?: throw ApiException(ExceptionType.DATA_NOT_FOUND)
+        val accessToken = tokenUtil.createAccessToken(userId)
+        val refreshToken = tokenUtil.createRefreshToken(userId)
+
+        user.accessToken = tokenHashService.hash(accessToken)
+        user.refreshToken = tokenHashService.hash(refreshToken)
+
+        return SocialLoginResponse(accessToken, refreshToken)
+    }
+
+    private fun generateUniqueSocialNickname(profile: SocialProfile): String {
+        val baseNickname = profile.name
+            ?.trim()
+            ?.replace(Regex("\\s+"), "")
+            ?.take(20)
+            ?.takeIf { it.isNotBlank() }
+            ?: "${profile.provider.name.lowercase()}_${profile.socialId.takeLast(8)}"
+
+        var nickname = baseNickname
+        var sequence = 1
+        while (userRepository.existsByNickname(nickname)) {
+            val suffix = sequence.toString()
+            nickname = baseNickname.take((20 - suffix.length).coerceAtLeast(1)) + suffix
+            sequence += 1
+        }
+        return nickname
     }
 
 }

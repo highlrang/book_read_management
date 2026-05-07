@@ -1,6 +1,7 @@
 package com.liber.book_read_management.entities
 
 import com.liber.book_read_management.config.SensitiveStringEncryptConverter
+import com.liber.book_read_management.enums.SocialProvider
 import jakarta.persistence.*
 import java.time.LocalTime
 
@@ -39,5 +40,10 @@ class User (
     var notificationTime: LocalTime? = null,
     @Convert(converter = SensitiveStringEncryptConverter::class)
     @Column(name = "fcm_token", length = 1000)
-    var fcmToken: String? = null
+    var fcmToken: String? = null,
+    @Enumerated(EnumType.STRING)
+    @Column(name = "social_provider", length = 20)
+    var socialProvider: SocialProvider? = null,
+    @Column(name = "social_id", length = 191)
+    var socialId: String? = null
 ) : BaseTimeEntity()
