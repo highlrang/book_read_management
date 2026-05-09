@@ -28,6 +28,7 @@ jobs:
           client.naver.clientSecret: ${{ secrets.NAVER_SEARCH_CLIENT_SECRET }}
           apiKey: ${{ secrets.API_KEY }}
           secretKey: ${{ secrets.SECRET_KEY }}
+          auth.social.google-client-id: ${{ secrets.GOOGLE_SERVER_CLIENT_ID }}
           auth.encryption.key-id: ${{ secrets.AUTH_ENCRYPTION_KEY_ID || 'primary' }}
           auth.encryption.algorithm: ${{ secrets.AUTH_ENCRYPTION_ALGORITHM || 'RSA/ECB/OAEPWithSHA-256AndMGF1Padding' }}
           auth.encryption.public-key: ${{ secrets.AUTH_ENCRYPTION_PUBLIC_KEY }}
