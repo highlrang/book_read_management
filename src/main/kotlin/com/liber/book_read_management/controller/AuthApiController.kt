@@ -67,6 +67,14 @@ class AuthApiController(
         )
     }
 
+    @Operation(summary = "소셜 로그인", description = "Google/Kakao/Naver 토큰을 검증하고 자동 회원가입 또는 로그인을 처리합니다.")
+    @PostMapping("/social-login")
+    fun socialLogin(@RequestBody request: SocialLoginRequest): ResponseEntity<ApiResponse<SocialLoginResponse>> {
+        return ResponseEntity.ok(
+            ApiResponse.success(userService.socialLogin(request))
+        )
+    }
+
     @Operation(summary = "로그아웃", description = "로그아웃을 처리합니다.")
     @PostMapping("/logout")
     fun logout(@CurrentUserId userId: Long) : ResponseEntity<ApiResponse<Unit>> {

@@ -1,6 +1,8 @@
 package com.liber.book_read_management.exception
 
 import com.liber.book_read_management.dto.ApiResponse
+import com.liber.book_read_management.dto.SocialProviderMismatchResponse
+import com.liber.book_read_management.enums.SocialProvider
 import com.liber.book_read_management.util.LogUtil
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -17,6 +19,16 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
         return ResponseEntity(response, resolveHttpStatus(e.exceptionType))
     }
 
+    @ExceptionHandler(SocialProviderMismatchException::class)
+    fun handleSocialProviderMismatchException(e: SocialProviderMismatchException): ResponseEntity<SocialProviderMismatchResponse> {
+        logUtil.logError(e)
+        val response = SocialProviderMismatchResponse(
+            registeredProvider = e.registeredProvider.name,
+            message = providerMismatchMessage(e.registeredProvider)
+        )
+        return ResponseEntity(response, HttpStatus.CONFLICT)
+    }
+
     @ExceptionHandler(Exception::class)
     fun handleException(e: Exception): ResponseEntity<ApiResponse<Nothing>> {
         logUtil.logError(e)
@@ -30,5 +42,15 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
             ExceptionType.EXPIRED_EMAIL_VERIFICATION_TOKEN -> HttpStatus.GONE
             else -> HttpStatus.BAD_REQUEST
         }
+    }
+
+    private fun providerMismatchMessage(provider: SocialProvider): String {
+        val providerName = when (provider) {
+            SocialProvider.GOOGLE -> "구글"
+            SocialProvider.KAKAO -> "카카오"
+            SocialProvider.NAVER -> "네이버"
+            SocialProvider.LOCAL -> "일반"
+        }
+        return "이미 ${providerName} 계정으로 가입된 이메일입니다."
     }
 }

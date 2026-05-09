@@ -6,6 +6,7 @@ interface UserService {
 
     fun signUp(request: SignUpRequest): AuthResponse
     fun login(request: LoginRequest): AuthResponse
+    fun socialLogin(request: SocialLoginRequest): SocialLoginResponse
     fun logout(userId: Long)
     fun refreshToken(refreshToken: String): AuthResponse
     fun updatePassword(request: UpdatePasswordRequest)
