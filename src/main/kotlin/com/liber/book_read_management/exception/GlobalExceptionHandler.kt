@@ -16,7 +16,7 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
     fun handleApiException(e: ApiException): ResponseEntity<ApiResponse<Nothing>> {
         logUtil.logError(e.exceptionType, e.customMessage)
         val response = ApiResponse.fail<Nothing>(e.exceptionType.code, e.customMessage ?: e.exceptionType.message)
-        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
+        return ResponseEntity(response, resolveHttpStatus(e.exceptionType))
     }
 
     @ExceptionHandler(SocialProviderMismatchException::class)
@@ -35,6 +35,13 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
         val exceptionType = ExceptionType.INTERNAL_SERVER_ERROR
         val response = ApiResponse.fail<Nothing>(exceptionType.code, exceptionType.message)
         return ResponseEntity(response, HttpStatus.INTERNAL_SERVER_ERROR)
+    }
+
+    private fun resolveHttpStatus(exceptionType: ExceptionType): HttpStatus {
+        return when (exceptionType) {
+            ExceptionType.EXPIRED_EMAIL_VERIFICATION_TOKEN -> HttpStatus.GONE
+            else -> HttpStatus.BAD_REQUEST
+        }
     }
 
     private fun providerMismatchMessage(provider: SocialProvider): String {

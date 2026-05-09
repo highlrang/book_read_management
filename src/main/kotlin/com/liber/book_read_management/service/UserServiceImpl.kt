@@ -158,9 +158,13 @@ class UserServiceImpl(
         user.password = encryptPassword(rawPassword)
     }
 
+    override fun verifyEmailToken(token: String) {
+        emailVerificationService.verifyToken(token)
+    }
+
     override fun verifyEmail(token: String?, email: String?, code: String?) {
         if (!token.isNullOrBlank()) {
-            emailVerificationService.verifyToken(token)
+            verifyEmailToken(token)
             return
         }
 

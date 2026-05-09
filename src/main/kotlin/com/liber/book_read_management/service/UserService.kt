@@ -10,6 +10,7 @@ interface UserService {
     fun logout(userId: Long)
     fun refreshToken(refreshToken: String): AuthResponse
     fun updatePassword(request: UpdatePasswordRequest)
+    fun verifyEmailToken(token: String)
     fun verifyEmail(token: String?, email: String?, code: String?)
     fun checkNickname(nickname: String) : NicknameCheckResponse
     fun getReadingGoal(userId: Long): ReadingGoalResponse
