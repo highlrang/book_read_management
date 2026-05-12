@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import com.fasterxml.jackson.annotation.JsonProperty
+import com.liber.book_read_management.enums.SocialLoginPlatform
 import com.liber.book_read_management.enums.SocialProvider
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
@@ -28,19 +29,20 @@ data class SocialProfile(
 @Service
 class SocialProfileService(
     restClientBuilder: RestClient.Builder,
-    @Value("\${auth.social.google-client-id:}") private val googleClientId: String
+    @Value("\${auth.social.google.aos-client-id:}") private val googleAosClientId: String,
+    @Value("\${auth.social.google.ios-client-id:}") private val googleIosClientId: String
 ) {
     private val restClient = restClientBuilder.build()
     private val keyFactory = KeyFactory.getInstance("RSA")
 
-    fun getProfile(provider: SocialProvider, token: String): SocialProfile {
+    fun getProfile(provider: SocialProvider, token: String, platform: SocialLoginPlatform): SocialProfile {
         if (token.isBlank()) {
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
 
         return when (provider) {
             SocialProvider.GOOGLE -> runCatching {
-                verifyGoogleIdToken(token)
+                verifyGoogleIdToken(token, platform)
             }.getOrElse {
                 if (it is ApiException) throw it
                 throw ApiException(ExceptionType.INVALID_AUTH)
@@ -51,9 +53,10 @@ class SocialProfileService(
         }
     }
 
-    private fun verifyGoogleIdToken(idToken: String): SocialProfile {
+    private fun verifyGoogleIdToken(idToken: String, platform: SocialLoginPlatform): SocialProfile {
+        val googleClientId = googleClientIdFor(platform)
         if (googleClientId.isBlank()) {
-            throw ApiException(ExceptionType.INVALID_AUTH, "Google client id 설정이 필요합니다.")
+            throw ApiException(ExceptionType.INVALID_AUTH, "Google ${platform.name} client id 설정이 필요합니다.")
         }
 
         val decoded = JWT.decode(idToken)
@@ -91,6 +94,13 @@ class SocialProfileService(
             email = email,
             name = verified.getClaim("name").asString()
         )
+    }
+
+    private fun googleClientIdFor(platform: SocialLoginPlatform): String {
+        return when (platform) {
+            SocialLoginPlatform.AOS -> googleAosClientId
+            SocialLoginPlatform.IOS -> googleIosClientId
+        }
     }
 
     private fun getKakaoProfile(accessToken: String): SocialProfile {

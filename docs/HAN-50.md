@@ -32,7 +32,8 @@
 ```json
 {
   "provider": "GOOGLE",
-  "token": "..."
+  "token": "...",
+  "platform": "IOS"
 }
 ```
 
@@ -41,6 +42,12 @@ provider별 token:
 - `GOOGLE`: `idToken`
 - `KAKAO`: `accessToken`
 - `NAVER`: `accessToken`
+
+platform:
+
+- `IOS`: iOS 앱에서 발급받은 소셜 토큰
+- `AOS`: Android 앱에서 발급받은 소셜 토큰
+- Google 로그인에서는 platform에 따라 검증할 OAuth client id를 선택한다.
 
 성공 응답:
 
@@ -85,20 +92,22 @@ provider별 token:
 - `sub`를 `socialId`로 저장한다.
 - `email_verified`가 true인 토큰만 인정한다.
 - `issuer`는 Google issuer만 인정한다.
-- `audience`는 서버에 설정된 `GOOGLE_SERVER_CLIENT_ID`와 일치해야 한다.
+- `audience`는 요청 platform에 맞는 Google client id와 일치해야 한다.
 
-`google-client-id`가 필요한 이유:
+`google client id`가 필요한 이유:
 
 - idToken payload는 디코딩만 하면 읽을 수 있지만, 디코딩은 신뢰 검증이 아니다.
 - 서명 검증은 "Google이 발급한 토큰"인지 확인한다.
 - audience 검증은 "우리 서버용 client id 대상으로 발급된 토큰"인지 확인한다.
 - `aud` 검증이 없으면 다른 Google OAuth client를 대상으로 발급된 idToken도 백엔드에서 받아들일 수 있다.
-- Flutter에서 `serverClientId` 기준으로 idToken을 발급한다면, 백엔드는 같은 값을 `GOOGLE_SERVER_CLIENT_ID`로 설정해야 한다.
+- Flutter Android에서 `serverClientId` 기준으로 idToken을 발급한다면, 백엔드는 같은 값을 `GOOGLE_AOS_CLIENT_ID` 또는 기존 호환 환경변수 `GOOGLE_SERVER_CLIENT_ID`로 설정해야 한다.
+- iOS에서 iOS OAuth client id 기준으로 idToken이 발급된다면, 백엔드는 같은 값을 `GOOGLE_IOS_CLIENT_ID`로 설정해야 한다.
 
 운영 설정:
 
 ```env
-GOOGLE_SERVER_CLIENT_ID=...
+GOOGLE_AOS_CLIENT_ID=...
+GOOGLE_IOS_CLIENT_ID=...
 ```
 
 ### Kakao
@@ -173,7 +182,7 @@ provider mismatch 응답에서는 일반 회원을 `LOCAL`로 처리한다.
 
 ## 남은 운영 확인 사항
 
-- 운영/개발 환경에 `GOOGLE_SERVER_CLIENT_ID` 설정 필요
+- 운영/개발 환경에 `GOOGLE_AOS_CLIENT_ID`, `GOOGLE_IOS_CLIENT_ID` 설정 필요
 - DB 스키마 반영 필요
 - Kakao/Naver 앱 설정에서 이메일 제공 동의 항목 확인 필요
 - 기존 일반 이메일 회원과 소셜 회원 간 정책을 제품 관점에서 확정 필요

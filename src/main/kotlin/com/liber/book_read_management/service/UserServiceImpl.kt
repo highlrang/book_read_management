@@ -68,7 +68,7 @@ class UserServiceImpl(
             throw ApiException(ExceptionType.VALIDATION_ERROR)
         }
 
-        val profile = socialProfileService.getProfile(request.provider, request.token)
+        val profile = socialProfileService.getProfile(request.provider, request.token, request.platform)
         val socialUser = userRepository.findBySocialProviderAndSocialId(profile.provider, profile.socialId)
         if (socialUser != null) {
             return issueSocialAuthTokens(socialUser)
