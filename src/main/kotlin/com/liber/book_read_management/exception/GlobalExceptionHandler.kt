@@ -6,6 +6,7 @@ import com.liber.book_read_management.enums.SocialProvider
 import com.liber.book_read_management.util.LogUtil
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 
@@ -27,6 +28,14 @@ class GlobalExceptionHandler(val logUtil: LogUtil) {
             message = providerMismatchMessage(e.registeredProvider)
         )
         return ResponseEntity(response, HttpStatus.CONFLICT)
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException::class)
+    fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ApiResponse<Nothing>> {
+        logUtil.logError(e)
+        val exceptionType = ExceptionType.VALIDATION_ERROR
+        val response = ApiResponse.fail<Nothing>(exceptionType.code, exceptionType.message)
+        return ResponseEntity(response, HttpStatus.BAD_REQUEST)
     }
 
     @ExceptionHandler(Exception::class)

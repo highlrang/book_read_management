@@ -35,7 +35,7 @@ class SocialProfileService(
     private val restClient = restClientBuilder.build()
     private val keyFactory = KeyFactory.getInstance("RSA")
 
-    fun getProfile(provider: SocialProvider, token: String, platform: SocialLoginPlatform): SocialProfile {
+    fun getProfile(provider: SocialProvider, token: String, platform: SocialLoginPlatform?): SocialProfile {
         if (token.isBlank()) {
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
@@ -53,10 +53,11 @@ class SocialProfileService(
         }
     }
 
-    private fun verifyGoogleIdToken(idToken: String, platform: SocialLoginPlatform): SocialProfile {
-        val googleClientId = googleClientIdFor(platform)
-        if (googleClientId.isBlank()) {
-            throw ApiException(ExceptionType.INVALID_AUTH, "Google ${platform.name} client id 설정이 필요합니다.")
+    private fun verifyGoogleIdToken(idToken: String, platform: SocialLoginPlatform?): SocialProfile {
+        val googleClientIds = googleClientIdsFor(platform)
+        if (googleClientIds.isEmpty()) {
+            val platformName = platform?.name ?: "AOS/IOS"
+            throw ApiException(ExceptionType.INVALID_AUTH, "Google $platformName client id 설정이 필요합니다.")
         }
 
         val decoded = JWT.decode(idToken)
@@ -74,7 +75,7 @@ class SocialProfileService(
         if (verified.issuer !in GOOGLE_ISSUERS) {
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
-        if (!verified.audience.contains(googleClientId)) {
+        if (verified.audience.none { it in googleClientIds }) {
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
         if (verified.expiresAt == null || verified.expiresAt.before(Date())) {
@@ -96,10 +97,11 @@ class SocialProfileService(
         )
     }
 
-    private fun googleClientIdFor(platform: SocialLoginPlatform): String {
+    private fun googleClientIdsFor(platform: SocialLoginPlatform?): List<String> {
         return when (platform) {
-            SocialLoginPlatform.AOS -> googleAosClientId
-            SocialLoginPlatform.IOS -> googleIosClientId
+            SocialLoginPlatform.AOS -> listOf(googleAosClientId)
+            SocialLoginPlatform.IOS -> listOf(googleIosClientId)
+            null -> listOf(googleAosClientId, googleIosClientId).filter { it.isNotBlank() }
         }
     }
 
