@@ -8,6 +8,7 @@ import com.liber.book_read_management.enums.SocialLoginPlatform
 import com.liber.book_read_management.enums.SocialProvider
 import com.liber.book_read_management.exception.ApiException
 import com.liber.book_read_management.exception.ExceptionType
+import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpHeaders
 import org.springframework.stereotype.Service
@@ -18,6 +19,8 @@ import java.security.interfaces.RSAPublicKey
 import java.security.spec.RSAPublicKeySpec
 import java.util.Base64
 import java.util.Date
+
+private val log = KotlinLogging.logger {}
 
 data class SocialProfile(
     val provider: SocialProvider,
@@ -113,12 +116,17 @@ class SocialProfileService(
                 .retrieve()
                 .body(KakaoUserResponse::class.java)
         }.getOrElse {
+            log.warn(it) { "Kakao /v2/user/me API call failed: ${it.message}" }
             throw ApiException(ExceptionType.INVALID_AUTH)
         } ?: throw ApiException(ExceptionType.INVALID_AUTH)
 
         val socialId = response.id?.toString()
         val email = response.kakaoAccount?.email
-        if (socialId.isNullOrBlank() || email.isNullOrBlank()) {
+        if (socialId.isNullOrBlank()) {
+            throw ApiException(ExceptionType.INVALID_AUTH)
+        }
+        if (email.isNullOrBlank()) {
+            log.warn { "Kakao profile email is null for socialId=$socialId. Verify that email scope is granted in the Kakao OAuth app." }
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
 
@@ -138,15 +146,23 @@ class SocialProfileService(
                 .retrieve()
                 .body(NaverUserResponse::class.java)
         }.getOrElse {
+            log.warn(it) { "Naver /v1/nid/me API call failed: ${it.message}" }
             throw ApiException(ExceptionType.INVALID_AUTH)
         } ?: throw ApiException(ExceptionType.INVALID_AUTH)
 
         if (response.resultcode != "00") {
+            log.warn { "Naver API returned non-success resultcode=${response.resultcode}, message=${response.message}" }
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
 
         val profile = response.response ?: throw ApiException(ExceptionType.INVALID_AUTH)
-        if (profile.id.isNullOrBlank() || profile.email.isNullOrBlank()) {
+
+        if (profile.id.isNullOrBlank()) {
+            throw ApiException(ExceptionType.INVALID_AUTH)
+        }
+
+        if (profile.email.isNullOrBlank()) {
+            log.warn { "Naver profile email is null for socialId=${profile.id}. Verify that email scope is granted in the Naver OAuth app." }
             throw ApiException(ExceptionType.INVALID_AUTH)
         }
 
