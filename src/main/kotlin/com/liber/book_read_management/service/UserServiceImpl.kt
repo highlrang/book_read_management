@@ -28,7 +28,8 @@ class UserServiceImpl(
     private val pushNotificationService: PushNotificationService,
     private val authEncryptionService: AuthEncryptionService,
     private val tokenHashService: TokenHashService,
-    private val socialProfileService: SocialProfileService
+    private val socialProfileService: SocialProfileService,
+    private val appFeatureService: AppFeatureService
 ) : UserService {
 
     override fun checkNickname(nickname: String): NicknameCheckResponse {
@@ -67,6 +68,7 @@ class UserServiceImpl(
         if (request.provider == SocialProvider.LOCAL || request.token.isBlank()) {
             throw ApiException(ExceptionType.VALIDATION_ERROR)
         }
+        appFeatureService.validateSocialLoginEnabled(request.provider)
 
         val profile = socialProfileService.getProfile(request.provider, request.token, request.platform)
         val socialUser = userRepository.findBySocialProviderAndSocialId(profile.provider, profile.socialId)

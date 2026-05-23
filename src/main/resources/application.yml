@@ -55,8 +55,15 @@ secretKey: ${SECRET_KEY}
 fcm:
   server-key: ${FCM_SERVER_KEY:}
 
+app:
+  features:
+    address:
+      enabled: ${ADDRESS_FEATURE_ENABLED:false}
+
 auth:
   social:
+    kakao:
+      enabled: ${KAKAO_SOCIAL_LOGIN_ENABLED:false}
     google:
       aos-client-id: ${GOOGLE_AOS_CLIENT_ID:${GOOGLE_SERVER_CLIENT_ID:}}
       ios-client-id: ${GOOGLE_IOS_CLIENT_ID:}
