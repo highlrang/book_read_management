@@ -24,6 +24,7 @@ class LogUtil(val objectMapper: ObjectMapper) {
             "token",
             "authorization"
         )
+        private val SENSITIVE_FIELD_NAMES = SENSITIVE_FIELDS.map { it.lowercase() }.toSet()
         private const val MASKED_VALUE = "***"
     }
 
@@ -31,6 +32,8 @@ class LogUtil(val objectMapper: ObjectMapper) {
     fun logRequest(request: ContentCachingRequestWrapper) {
         val method = request.method
         val requestUri = request.requestURI
+        val queryString = sanitizeQueryString(request.queryString)
+        val fullPath = if (queryString.isNullOrBlank()) requestUri else "$requestUri?$queryString"
         val headerNames = request.headerNames
         val headers = LinkedHashMap<String, String>()
         for (headerName in headerNames) {
@@ -41,6 +44,8 @@ class LogUtil(val objectMapper: ObjectMapper) {
         logMap["type"] = "REQUEST"
         logMap["method"] = method
         logMap["requestUri"] = requestUri
+        logMap["queryString"] = queryString
+        logMap["fullPath"] = fullPath
         logMap["headers"] = headers
         logMap["body"] = sanitizeBody(body)
         log.info("REQUEST {}", entries(logMap))
@@ -93,6 +98,23 @@ class LogUtil(val objectMapper: ObjectMapper) {
         return if (headerName.lowercase() in SENSITIVE_HEADERS) MASKED_VALUE else value
     }
 
+    private fun sanitizeQueryString(queryString: String?): String? {
+        if (queryString.isNullOrBlank()) {
+            return null
+        }
+
+        return queryString.split("&").joinToString("&") { parameter ->
+            val separatorIndex = parameter.indexOf("=")
+            val name = if (separatorIndex >= 0) parameter.substring(0, separatorIndex) else parameter
+
+            if (isSensitiveFieldName(name)) {
+                "$name=$MASKED_VALUE"
+            } else {
+                parameter
+            }
+        }
+    }
+
     private fun sanitizeBody(body: String): Any? {
         if (body.isBlank()) {
             return null
@@ -110,7 +132,7 @@ class LogUtil(val objectMapper: ObjectMapper) {
             val objectNode = node.deepCopy<ObjectNode>()
             val fieldNames = objectNode.fieldNames().asSequence().toList()
             for (fieldName in fieldNames) {
-                if (fieldName in SENSITIVE_FIELDS) {
+                if (isSensitiveFieldName(fieldName)) {
                     objectNode.put(fieldName, MASKED_VALUE)
                 } else {
                     objectNode.set(fieldName, sanitizeJsonNode(objectNode[fieldName]))
@@ -126,5 +148,9 @@ class LogUtil(val objectMapper: ObjectMapper) {
         }
 
         return node
+    }
+
+    private fun isSensitiveFieldName(fieldName: String): Boolean {
+        return fieldName.lowercase() in SENSITIVE_FIELD_NAMES
     }
 }
