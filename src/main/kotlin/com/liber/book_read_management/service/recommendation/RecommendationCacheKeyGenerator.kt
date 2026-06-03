@@ -6,7 +6,7 @@ import java.security.MessageDigest
 object RecommendationCacheKeyGenerator {
 
     @JvmStatic
-    fun generate(userId: Long, request: BookInfoRequest): String {
+    fun generate(userId: Long, request: BookInfoRequest, readIsbns: Collection<String> = emptyList()): String {
         val source = buildString {
             append(userId)
             append("::")
@@ -15,6 +15,15 @@ object RecommendationCacheKeyGenerator {
             append(request.introduction)
             append("::")
             append(request.reviews.joinToString("||"))
+            append("::")
+            append(
+                readIsbns
+                    .map { it.trim() }
+                    .filter { it.isNotBlank() }
+                    .distinct()
+                    .sorted()
+                    .joinToString("||")
+            )
         }
 
         val digest = MessageDigest.getInstance("SHA-256").digest(source.toByteArray())

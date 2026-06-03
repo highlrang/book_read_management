@@ -28,7 +28,7 @@ class BookServiceImpl(
                     categoryId = categoryId,
                     searchTarget = bookSearchRequest.searchTarget.value,
                     maxResult = bookSearchRequest.size,
-                    start = bookSearchRequest.page * bookSearchRequest.size + 1
+                    start = bookSearchRequest.page
                 )
             else
                 aladinClient.searchItem(
@@ -37,7 +37,7 @@ class BookServiceImpl(
                     categoryId = categoryId,
                     searchTarget = bookSearchRequest.searchTarget.value,
                     maxResult = bookSearchRequest.size,
-                    start = bookSearchRequest.page * bookSearchRequest.size + 1,
+                    start = bookSearchRequest.page,
                     sort = bookSearchRequest.sort.value
                 )
 

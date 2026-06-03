@@ -3,6 +3,7 @@ package com.liber.book_read_management.service.recommendation
 import com.liber.book_read_management.dto.BookSearchResponse
 import com.liber.book_read_management.dto.PageResponse
 import com.liber.book_read_management.dto.semantic.BookInfoRequest
+import com.liber.book_read_management.repository.BookReadLogRepository
 import com.liber.book_read_management.service.recommendation.model.RecommendationPipelineResult
 import com.liber.book_read_management.service.recommendation.model.RecommendationSourceLog
 import com.liber.book_read_management.service.recommendation.model.RecommendationTrace
@@ -26,7 +27,8 @@ class RecommendationAgentService(
     private val filterService: FilterService,
     private val rankerService: RankerService,
     private val explainerService: ExplainerService,
-    private val recommendationHistoryService: RecommendationHistoryService
+    private val recommendationHistoryService: RecommendationHistoryService,
+    private val bookReadLogRepository: BookReadLogRepository
 ) {
     fun recommend(
         userId: Long,
@@ -34,7 +36,8 @@ class RecommendationAgentService(
         sourceLogs: List<RecommendationSourceLog>
     ): PageResponse<List<BookSearchResponse>> {
         val trace = RecommendationTrace(traceId = UUID.randomUUID().toString())
-        val cacheKey = RecommendationCacheKeyGenerator.generate(userId, request)
+        val readIsbns = bookReadLogRepository.findBookIsbnsByUserId(userId)
+        val cacheKey = RecommendationCacheKeyGenerator.generate(userId, request, readIsbns)
         val recommendationCache = cacheManager.getCache("recommendations")
         val cachedResult = recommendationCache?.get(cacheKey, RecommendationPipelineResult::class.java)
 
@@ -50,7 +53,7 @@ class RecommendationAgentService(
             )
             cachedResult
         } else {
-            val computed = runPipeline(trace, userId, request)
+            val computed = runPipeline(trace, userId, request, readIsbns)
             recommendationCache?.put(cacheKey, computed)
             computed
         }
@@ -78,7 +81,8 @@ class RecommendationAgentService(
     private fun runPipeline(
         trace: RecommendationTrace,
         userId: Long,
-        request: BookInfoRequest
+        request: BookInfoRequest,
+        readIsbns: Collection<String>
     ): RecommendationPipelineResult {
         var retryCount = 0
 
@@ -157,7 +161,7 @@ class RecommendationAgentService(
             stage = "filter",
             latencyField = "filterLatency",
             action = {
-                filterService.filter(userId, retrievedCandidates)
+                filterService.filter(retrievedCandidates, readIsbns)
             },
             endFields = { result ->
                 mapOf(
