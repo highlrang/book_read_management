@@ -11,8 +11,16 @@ class FilterService(
 ) {
 
     fun filter(userId: Long, candidates: List<RecommendationCandidate>): FilterResult {
-        val readIsbns = bookReadLogRepository.findAllByUserId(userId)
-            .map { it.bookIsbn.trim() }
+        return filter(candidates, bookReadLogRepository.findBookIsbnsByUserId(userId))
+    }
+
+    fun filter(
+        candidates: List<RecommendationCandidate>,
+        readIsbns: Collection<String>
+    ): FilterResult {
+        val normalizedReadIsbns = readIsbns
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
             .toSet()
 
         val seenIsbns = mutableSetOf<String>()
@@ -27,7 +35,7 @@ class FilterService(
                 !seenIsbns.add(normalizedIsbn(candidate)) -> {
                     removedCount += 1
                 }
-                normalizedIsbn(candidate) in readIsbns -> {
+                normalizedIsbn(candidate) in normalizedReadIsbns -> {
                     removedCount += 1
                 }
                 else -> filtered += candidate

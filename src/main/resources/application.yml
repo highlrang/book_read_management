@@ -47,6 +47,11 @@ client:
   naver:
     clientId: ${NAVER_SEARCH_CLIENT_ID:}
     clientSecret: ${NAVER_SEARCH_CLIENT_SECRET:}
+    search:
+      enabled: ${NAVER_SEARCH_ENABLED:true}
+      min-interval-ms: ${NAVER_SEARCH_MIN_INTERVAL_MS:120}
+      cooldown-on-too-many-requests-ms: ${NAVER_SEARCH_COOLDOWN_ON_TOO_MANY_REQUESTS_MS:60000}
+      max-list-external-lookups: ${NAVER_SEARCH_MAX_LIST_EXTERNAL_LOOKUPS:5}
 
 apiKey: ${API_KEY}
 
