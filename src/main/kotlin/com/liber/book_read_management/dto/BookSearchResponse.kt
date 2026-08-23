@@ -23,7 +23,7 @@ class BookSearchResponse(
     var pubDate: String?,
     @Schema(description = "카테고리", example = "기술/IT")
     var category: String,
-    @Schema(description = "링크", example = "http://www.aladin.co.kr/shop/wproduct.aspx?ItemId=116520102&amp;partner=openAPI&amp;start=api")
+    @Schema(description = "링크", example = "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=116520102&amp;partner=openAPI&amp;start=api")
     var link: String?,
 
 ) {
