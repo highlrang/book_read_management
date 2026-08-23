@@ -11,7 +11,7 @@ class BookDetailResponse (
     val logo: String?,
     @Schema(description = "표지", example = "https://image.aladin.co.kr/product/3020/9/cover/8960777331_1.jpg")
     val cover: String?,
-    @Schema(description = "링크", example = "http://www.aladin.co.kr/shop/wproduct.aspx?ItemId=116520102&amp;partner=openAPI&amp;start=api")
+    @Schema(description = "링크", example = "https://www.aladin.co.kr/shop/wproduct.aspx?ItemId=116520102&amp;partner=openAPI&amp;start=api")
     val link: String?,
     @Schema(description = "제목", example = "Kotlin in Action")
     val title: String?,

@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
 
-@FeignClient(name = "aladin-client", url = "http://www.aladin.co.kr", configuration = [AladinClientConfig::class])
+@FeignClient(name = "aladin-client", url = "https://www.aladin.co.kr", configuration = [AladinClientConfig::class])
 interface AladinClient {
 
     @GetMapping("/ttb/api/ItemSearch.aspx")
